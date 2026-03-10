@@ -1,0 +1,10 @@
+{
+	"scripts": {
+		"dev": "tsc-watch --onSuccess \"node --enable-source-maps ./dist/main.js\""
+	},
+	"devDependencies": {
+		"@types/node": "^20.11.27",
+		"typescript": "^5.9.3",
+		"tsc-watch": "^6.0.4"
+	}
+}
