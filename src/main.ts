@@ -1,3 +1,6 @@
-import { veezbot } from '@veezbot/lib';
+import { bus } from './bus';
+import { SocketModule } from './socket/socket';
+import { SocketService } from './socket/socket.service';
 
-console.log(`Hello ${veezbot}!`);
+export const socketService = new SocketService(bus);
+new SocketModule(bus);
