@@ -2,6 +2,9 @@
 	"scripts": {
 		"dev": "tsc-watch --onSuccess \"node --enable-source-maps ./dist/main.js\""
 	},
+	"dependencies": {
+		"@veezbot/lib": "workspace:*"
+	},
 	"devDependencies": {
 		"@types/node": "^20.11.27",
 		"typescript": "^5.9.3",
