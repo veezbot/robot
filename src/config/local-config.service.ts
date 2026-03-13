@@ -26,11 +26,11 @@ export class LocalConfigService {
 
     for (const path of paths) {
       if (existsSync(path)) {
-        console.log(`[Config] Loaded from ${path}`);
+        console.log(`[LocalConfigService] Loaded from ${path}`);
         return JSON.parse(readFileSync(path, 'utf-8')) as LocalConfig;
       }
     }
 
-    throw new Error(`[Config] No config file found. Expected at:\n${paths.join('\n')}`);
+    throw new Error(`[LocalConfigService] No config file found. Expected at:\n${paths.join('\n')}`);
   }
 }

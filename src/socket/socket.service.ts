@@ -18,6 +18,7 @@ export class SocketService {
 
     this.socket.on('connect', () => {
       console.log('[SocketService] Connected!');
+      bus.emit(SocketEvent.Connected);
     });
 
     this.socket.on('disconnect', () => {
