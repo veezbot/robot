@@ -1,13 +1,16 @@
-import { ActionModule } from './action/action.module';
-import { bus } from './bus';
-import { CommandModule } from './command/command.module';
-import { LogModule } from './log/log.module';
-import { SocketModule } from './socket/socket';
+import { ActionService } from './action/action.service';
+import { BusService } from './bus/bus.service';
+import { CommandService } from './command/command.service';
+import { LocalConfigService } from './config/local-config.service';
+import { RemoteConfigService } from './config/remote-config.service';
+import { LogService } from './log/log.service';
 import { SocketService } from './socket/socket.service';
 
-const socketService = new SocketService(bus);
-const command = new CommandModule();
-const log = new LogModule();
+const bus = new BusService();
+const localConfig = new LocalConfigService();
+const socketService = new SocketService(bus, localConfig);
+const command = new CommandService();
+const log = new LogService();
 
-new SocketModule(bus);
-new ActionModule(socketService, command, log);
+new RemoteConfigService(socketService);
+new ActionService(socketService, command, log);

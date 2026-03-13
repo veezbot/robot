@@ -1,12 +1,37 @@
-import { EventEmitter } from 'events';
-import { Socket } from 'socket.io-client';
-import {SocketConnectedPayload, SocketEvent} from "./socket.events";
+import { io, Socket } from 'socket.io-client';
+import { BusService } from '../bus/bus.service';
+import { LocalConfigService } from '../config/local-config.service';
+import { SocketEvent } from './socket.events';
 
 export class SocketService {
   private socket!: Socket;
+  robotId!: string;
 
-  constructor(bus: EventEmitter) {
-    bus.on(SocketEvent.Connected, (socket: SocketConnectedPayload) => this.socket = socket);
+  get whipUrl(): string {
+    return `${this.localConfig.mediamtxUrl}/robot/${this.robotId}/whip`;
+  }
+
+  constructor(
+    bus: BusService,
+    private readonly localConfig: LocalConfigService,
+  ) {
+    const socket = io(`${localConfig.serverUrl}/robot`, {
+      auth: { token: localConfig.token },
+    });
+
+    socket.on('connect', () => {
+      console.log('[SocketService] Connected!');
+      this.socket = socket;
+    });
+
+    socket.on('disconnect', () => {
+      console.log('[SocketService] Disconnected!');
+      bus.emit(SocketEvent.Disconnected);
+    });
+
+    socket.on('connect_error', error => {
+      console.log('[SocketService] Error!', error.message);
+    });
   }
 
   emit(event: string, data?: unknown) {

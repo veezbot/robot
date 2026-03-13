@@ -1,7 +1,6 @@
 import { Action, ActionEvent, ActionExecutePayload, ActionExecuteResponse } from '@veezbot/lib';
-import { WHIP_URL } from '../config/config';
-import { CommandModule } from '../command/command.module';
-import { LogModule } from '../log/log.module';
+import { CommandService } from '../command/command.service';
+import { LogService } from '../log/log.service';
 import { SocketService } from '../socket/socket.service';
 
 type ArgDef = { flag: string } | { positional: true };
@@ -29,11 +28,11 @@ function resolveArgs(def: ActionDef, args: Record<string, string>): string[] | {
   return [...flagArgs, ...positionalArgs];
 }
 
-export class ActionModule {
+export class ActionService {
   constructor(
-    socketService: SocketService,
-    private readonly command: CommandModule,
-    private readonly log: LogModule,
+    private readonly socketService: SocketService,
+    private readonly command: CommandService,
+    private readonly log: LogService,
   ) {
     socketService.on(ActionEvent.Execute, (payload: ActionExecutePayload, callback: (result: ActionExecuteResponse) => void) => {
       this.execute(payload, callback);
@@ -57,7 +56,7 @@ export class ActionModule {
 
   private wake(args: string[], callback: (result: ActionExecuteResponse) => void) {
     this.command.run(
-      `rpicam-vid -t 0 --codec h264 --width 640 --height 480 --framerate 24 --bitrate 1000000 --profile baseline --inline --intra 24 --flush -o - | ffmpeg-whip -fflags nobuffer+genpts+discardcorrupt -f h264 -r 24 -i - -c:v copy -map 0:v -bsf:v extract_extradata -ts_buffer_size 2000000 -f whip ${WHIP_URL}`,
+      `rpicam-vid -t 0 --codec h264 --width 640 --height 480 --framerate 24 --bitrate 1000000 --profile baseline --inline --intra 24 --flush -o - | ffmpeg-whip -fflags nobuffer+genpts+discardcorrupt -f h264 -r 24 -i - -c:v copy -map 0:v -bsf:v extract_extradata -ts_buffer_size 2000000 -f whip ${this.socketService.whipUrl}`,
     ).then(() => this.log.info('Video stream ended'));
     // TODO: start GPIOs
     this.log.info('Robot waking up');

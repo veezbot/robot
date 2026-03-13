@@ -1,4 +1,4 @@
-export class LogModule {
+export class LogService {
   info(message: string) {
     console.log(`[${new Date().toISOString()}] INFO  ${message}`);
   }

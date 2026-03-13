@@ -2,10 +2,10 @@ import { spawn } from 'child_process';
 
 export type RunResult = { stdout: string; stderr: string; code: number | null } | { error: string };
 
-export class CommandModule {
+export class CommandService {
   run(cmd: string): Promise<RunResult> {
     return new Promise((resolve) => {
-      console.log(`[CommandModule] Running: ${cmd}`);
+      console.log(`[CommandService] Running: ${cmd}`);
       const proc = spawn('sh', ['-c', cmd]);
       let stdout = '';
       let stderr = '';
