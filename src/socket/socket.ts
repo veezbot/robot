@@ -1,11 +1,11 @@
 import { EventEmitter } from 'events';
 import { io } from 'socket.io-client';
 import { SocketConnectedPayload, SocketEvent } from './socket.events';
-import { config } from '../config/config';
+import { config, SERVER_URL } from '../config/config';
 
 export class SocketModule {
   constructor(bus: EventEmitter) {
-    const socket = io(`${process.env.SERVER_URL ?? 'http://localhost:3000'}/robot`, {
+    const socket = io(`${SERVER_URL}/robot`, {
       auth: { token: config.token },
     });
 

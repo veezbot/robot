@@ -3,6 +3,10 @@ import { join } from 'path';
 
 const CONFIG_FILENAME = 'veezbot.config.json';
 
+const serverUrl = process.env.SERVER_URL ?? 'localhost';
+export const SERVER_URL = `http://${serverUrl}:3000`;
+export const WHIP_URL = `http://${serverUrl}:8889/robot/whip`;
+
 interface RobotConfig {
   token: string;
 }
