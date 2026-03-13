@@ -2,3 +2,4 @@ dist
 node_modules
 .idea
 veezbot.config.json
+ffmpeg/bin

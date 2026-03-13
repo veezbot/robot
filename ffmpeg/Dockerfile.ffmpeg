@@ -1,0 +1,25 @@
+FROM debian:bookworm AS builder
+
+RUN apt-get update && apt-get install -y \
+    build-essential git pkg-config nasm \
+    libssl-dev libx264-dev libopus-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --depth=1 https://git.ffmpeg.org/ffmpeg.git /ffmpeg
+WORKDIR /ffmpeg
+
+RUN ./configure \
+    --prefix=/usr/local \
+    --enable-openssl \
+    --enable-version3 \
+    --enable-libx264 \
+    --enable-libopus \
+    --enable-gpl \
+    --disable-debug \
+    --disable-doc \
+    --disable-ffplay \
+    --disable-ffprobe \
+  && make -j$(nproc)
+
+FROM scratch
+COPY --from=builder /ffmpeg/ffmpeg /ffmpeg
