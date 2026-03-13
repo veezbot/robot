@@ -5,15 +5,10 @@ import { SocketEvent } from './socket.events';
 
 export class SocketService {
   private socket!: Socket;
-  robotId!: string;
-
-  get whipUrl(): string {
-    return `${this.localConfig.mediamtxUrl}/robot/${this.robotId}/whip`;
-  }
 
   constructor(
     bus: BusService,
-    private readonly localConfig: LocalConfigService,
+    localConfig: LocalConfigService,
   ) {
     const socket = io(`${localConfig.serverUrl}/robot`, {
       auth: { token: localConfig.token },
