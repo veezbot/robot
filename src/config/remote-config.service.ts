@@ -17,8 +17,8 @@ export class RemoteConfigService {
     bus: BusService,
   ) {
     socketService.on(ConfigEvent.Init, ({ robotId }: ConfigInitPayload) => {
-      console.log('[RemoteConfigService] Config init', { robotId, whipUrl: this.whipUrl });
       this.robotId = robotId;
+      console.log('[RemoteConfigService] Config init', { robotId, whipUrl: this.whipUrl });
       bus.emit(SocketEvent.ConfigReady);
     });
   }

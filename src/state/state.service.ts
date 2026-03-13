@@ -33,16 +33,16 @@ export class StateService {
   }
 
   private wake(callback?: (result: ActionExecuteResponse) => void) {
+    this.log.info('Robot waking up');
     this.video.start();
     // TODO: start GPIOs
-    this.log.info('Robot waking up');
     callback?.({ data: {} });
   }
 
   private async sleep(callback?: (result: ActionExecuteResponse) => void) {
+    this.log.info('Robot sleeping');
     await this.video.stop();
     // TODO: stop GPIOs
-    this.log.info('Robot sleeping');
     callback?.({ data: {} });
   }
 }
