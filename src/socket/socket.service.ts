@@ -1,31 +1,39 @@
 import { io, Socket } from 'socket.io-client';
+import { ErrorCode, ErrorMessage } from '@veezbot/lib';
 import { BusService } from '../bus/bus.service';
 import { LocalConfigService } from '../config/local-config.service';
 import { SocketEvent } from './socket.events';
 
 export class SocketService {
-  private socket!: Socket;
+  private socket: Socket;
 
   constructor(
     bus: BusService,
     localConfig: LocalConfigService,
   ) {
-    const socket = io(`${localConfig.serverUrl}/robot`, {
+    this.socket = io(`${localConfig.serverUrl}/robot`, {
       auth: { token: localConfig.token },
+      reconnection: false,
     });
 
-    socket.on('connect', () => {
+    this.socket.on('connect', () => {
       console.log('[SocketService] Connected!');
-      this.socket = socket;
     });
 
-    socket.on('disconnect', () => {
+    this.socket.on('disconnect', () => {
       console.log('[SocketService] Disconnected!');
       bus.emit(SocketEvent.Disconnected);
+      this.socket.connect();
     });
 
-    socket.on('connect_error', error => {
+    this.socket.on('connect_error', (error: Error) => {
       console.log('[SocketService] Error!', error.message);
+      const fatal = error.message === ErrorMessage[ErrorCode.InvalidToken] || error.message === ErrorMessage[ErrorCode.MissingToken];
+      if (fatal) {
+        console.error('[SocketService] Fatal auth error, not retrying');
+      } else {
+        setTimeout(() => this.socket.connect(), 3_000);
+      }
     });
   }
 
