@@ -6,16 +6,12 @@ try {
   GpioClass = class MockGpio implements GpioHandle {
     constructor(private pin: number, private mode: string) {}
     digitalWrite(level: number) {
-      console.log(`[MockGpio] pin=${this.pin} digitalWrite(${level})`);
     }
     pwmWrite(value: number) {
-      console.log(`[MockGpio] pin=${this.pin} pwmWrite(${value})`);
     }
     servoWrite(pulseWidth: number) {
-      console.log(`[MockGpio] pin=${this.pin} servoWrite(${pulseWidth})`);
     }
     hardwarePwmWrite(frequency: number, dutyCycle: number) {
-      console.log(`[MockGpio] pin=${this.pin} hardwarePwmWrite(freq=${frequency}, duty=${dutyCycle})`);
     }
   } as unknown as new (pin: number, mode: string) => GpioHandle;
 }
