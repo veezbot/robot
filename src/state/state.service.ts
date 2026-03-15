@@ -2,13 +2,15 @@ import { Action, ActionEvent, ActionExecutePayload, ActionExecuteResponse } from
 import { BusService } from '../bus/bus.service';
 import { LogService } from '../log/log.service';
 import { SocketService } from '../socket/socket.service';
-import { SocketEvent } from '../socket/socket.events';
+import { BusEvent } from '../bus/bus.events';
 import { VideoService } from '../video/video.service';
+import { ControlService } from '../control/control.service';
 
 export class StateService {
   constructor(
     socketService: SocketService,
     private readonly video: VideoService,
+    private readonly control: ControlService,
     private readonly log: LogService,
     bus: BusService,
   ) {
@@ -16,8 +18,8 @@ export class StateService {
       this.execute(payload, callback);
     });
 
-    bus.on(SocketEvent.ConfigReady, () => this.wake());
-    bus.on(SocketEvent.Disconnected, () => this.sleep());
+    bus.on(BusEvent.ConfigReady, () => this.wake());
+    bus.on(BusEvent.SocketDisconnected, () => this.sleep());
   }
 
   private execute({ action }: ActionExecutePayload, callback: (result: ActionExecuteResponse) => void) {
@@ -35,14 +37,13 @@ export class StateService {
   private wake(callback?: (result: ActionExecuteResponse) => void) {
     this.log.info('Robot waking up');
     this.video.start();
-    // TODO: start GPIOs
     callback?.({ data: {} });
   }
 
   private async sleep(callback?: (result: ActionExecuteResponse) => void) {
     this.log.info('Robot sleeping');
     await this.video.stop();
-    // TODO: stop GPIOs
+    this.control.stop();
     callback?.({ data: {} });
   }
 }

@@ -1,5 +1,6 @@
 import { BusService } from './bus/bus.service';
 import { CommandService } from './command/command.service';
+import { ControlService } from './control/control.service';
 import { LocalConfigService } from './config/local-config.service';
 import { RemoteConfigService } from './config/remote-config.service';
 import { LogService } from './log/log.service';
@@ -14,4 +15,5 @@ const command = new CommandService();
 const log = new LogService();
 const remoteConfig = new RemoteConfigService(socketService, localConfig, bus);
 const video = new VideoService(remoteConfig, command, log);
-new StateService(socketService, video, log, bus);
+const control = new ControlService(socketService, log);
+new StateService(socketService, video, control, log, bus);

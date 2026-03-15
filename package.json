@@ -1,7 +1,9 @@
 {
+	"name": "@veezbot/robot",
 	"scripts": {
 		"dev": "tsc-watch --onSuccess \"node --enable-source-maps ./dist/main.js\"",
-		"dev:pi": "tsc-watch --onSuccess \"bash -c '. ../scripts/config.sh && SERVER_URL=\\$DEV_HOST node --enable-source-maps ./dist/main.js'\""
+		"dev:pi": "tsc-watch --onSuccess \"bash -c '. ../scripts/config.sh && SERVER_URL=\\$DEV_HOST node --enable-source-maps ./dist/main.js'\"",
+		"dev:pi:debug": "tsc-watch --onSuccess \"bash -c '. ../scripts/config.sh && SERVER_URL=\\$DEV_HOST node --inspect=0.0.0.0:9229 --enable-source-maps ./dist/main.js'\""
 	},
 	"dependencies": {
 		"@veezbot/lib": "workspace:*",

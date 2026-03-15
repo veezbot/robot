@@ -1,8 +1,8 @@
 import { io, Socket } from 'socket.io-client';
 import { ErrorCode, ErrorMessage } from '@veezbot/lib';
 import { BusService } from '../bus/bus.service';
+import { BusEvent } from '../bus/bus.events';
 import { LocalConfigService } from '../config/local-config.service';
-import { SocketEvent } from './socket.events';
 
 export class SocketService {
   private socket: Socket;
@@ -18,12 +18,12 @@ export class SocketService {
 
     this.socket.on('connect', () => {
       console.log('[SocketService] Connected!');
-      bus.emit(SocketEvent.Connected);
+      bus.emit(BusEvent.SocketConnected);
     });
 
     this.socket.on('disconnect', () => {
       console.log('[SocketService] Disconnected!');
-      bus.emit(SocketEvent.Disconnected);
+      bus.emit(BusEvent.SocketDisconnected);
       this.socket.connect();
     });
 
@@ -38,8 +38,8 @@ export class SocketService {
     });
   }
 
-  emit(event: string, data?: unknown) {
-    this.socket.emit(event, data);
+  emit(event: string, data?: unknown, callback?: (data: any) => void) {
+    this.socket.emit(event, data, callback);
   }
 
   on(event: string, handler: (...args: any[]) => void) {
