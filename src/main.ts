@@ -6,6 +6,7 @@ import { RemoteConfigService } from './config/remote-config.service';
 import { LogService } from './log/log.service';
 import { SocketService } from './socket/socket.service';
 import { StateService } from './state/state.service';
+import { TelemetryService } from './telemetry/telemetry.service';
 import { VideoService } from './video/video.service';
 
 const bus = new BusService();
@@ -16,4 +17,5 @@ const log = new LogService();
 const remoteConfig = new RemoteConfigService(socketService, localConfig, bus);
 const video = new VideoService(remoteConfig, command, log);
 const control = new ControlService(socketService, log);
-new StateService(socketService, video, control, log, bus);
+const stateService = new StateService(socketService, video, control, log, bus);
+new TelemetryService(socketService, stateService);

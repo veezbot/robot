@@ -12,11 +12,13 @@ export class VideoService {
     private readonly log: LogService,
   ) {}
 
-  start(): void {
+  async start(): Promise<void> {
     if (this.process) {
       this.log.info('Video stream already running');
       return;
     }
+
+    await this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; true');
 
     this.log.info('Starting video stream');
 
@@ -45,6 +47,6 @@ export class VideoService {
       return;
     }
 
-    await this.command.run('pkill -f rpicam-vid');
+    await this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; true');
   }
 }

@@ -1,4 +1,4 @@
-import { Action, ActionEvent, ActionExecutePayload, ActionExecuteResponse } from '@veezbot/lib';
+import { Action, ActionEvent, ActionExecutePayload, ActionExecuteResponse, RobotState } from '@veezbot/lib';
 import { BusService } from '../bus/bus.service';
 import { LogService } from '../log/log.service';
 import { SocketService } from '../socket/socket.service';
@@ -7,6 +7,8 @@ import { VideoService } from '../video/video.service';
 import { ControlService } from '../control/control.service';
 
 export class StateService {
+  currentState: RobotState = 'sleep';
+
   constructor(
     socketService: SocketService,
     private readonly video: VideoService,
@@ -36,12 +38,14 @@ export class StateService {
 
   private wake(callback?: (result: ActionExecuteResponse) => void) {
     this.log.info('Robot waking up');
+    this.currentState = 'wake';
     this.video.start();
     callback?.({ data: {} });
   }
 
   private async sleep(callback?: (result: ActionExecuteResponse) => void) {
     this.log.info('Robot sleeping');
+    this.currentState = 'sleep';
     await this.video.stop();
     this.control.stop();
     callback?.({ data: {} });

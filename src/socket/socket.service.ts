@@ -39,7 +39,11 @@ export class SocketService {
   }
 
   emit(event: string, data?: unknown, callback?: (data: any) => void) {
-    this.socket.emit(event, data, callback);
+    if (callback !== undefined) {
+      this.socket.emit(event, data, callback);
+    } else {
+      this.socket.emit(event, data);
+    }
   }
 
   on(event: string, handler: (...args: any[]) => void) {
