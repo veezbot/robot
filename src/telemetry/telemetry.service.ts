@@ -1,11 +1,53 @@
 import * as os from 'os';
 import { readFileSync } from 'fs';
-import { RobotLatencyEvent, RobotTelemetryEvent, type RobotTelemetryData } from '@veezbot/lib';
+import { RobotLatencyEvent, RobotTelemetryEvent, type BatteryData, type RobotTelemetryData } from '@veezbot/lib';
 import { SocketService } from '../socket/socket.service';
 import { StateService } from '../state/state.service';
 
 const INTERVAL_MS = 2_000;
 const CPU_SAMPLE_MS = 1_000;
+
+// INA219 on I2C bus 1, address 0x43
+// Shunt: 0.1Ω, calibration: 4096 → current_lsb = 0.1mA
+const INA219_BUS   = 1;
+const INA219_ADDR  = 0x43;
+const INA219_CAL   = 0x0010; // 0x1000 big-endian → write as 0x0010 in SMBus word
+const REG_CAL      = 0x05;
+const REG_BUS_V    = 0x02;
+const REG_CURRENT  = 0x04;
+
+let i2cBus: { readWord(addr: number, cmd: number, cb: (err: Error | null, val: number) => void): void; writeWord(addr: number, cmd: number, val: number, cb: (err: Error | null) => void): void } | null = null;
+
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const i2c = require('i2c-bus');
+  const bus = i2c.openSync(INA219_BUS);
+  // Write calibration register (big-endian: 0x0010 in SMBus word = 0x1000 on chip)
+  bus.writeWordSync(INA219_ADDR, REG_CAL, INA219_CAL);
+  i2cBus = bus;
+} catch {
+  // i2c-bus not available (dev machine) or hardware not present
+}
+
+function swapBytes(val: number): number {
+  return ((val & 0xFF) << 8) | ((val >> 8) & 0xFF);
+}
+
+async function getBattery(): Promise<BatteryData | null> {
+  if (!i2cBus) return null;
+  return new Promise((resolve) => {
+    i2cBus!.readWord(INA219_ADDR, REG_BUS_V, (err, rawV) => {
+      if (err) return resolve(null);
+      i2cBus!.readWord(INA219_ADDR, REG_CURRENT, (err2, rawI) => {
+        if (err2) return resolve(null);
+        const busReg = swapBytes(rawV);
+        const voltage = Math.round(((busReg >> 3) * 4) / 10) / 100; // V, 2 decimals
+        const current = Math.round(swapBytes(rawI) * 0.1);           // mA
+        resolve({ voltage, current });
+      });
+    });
+  });
+}
 
 function getCpuLoad(): Promise<number> {
   return new Promise((resolve) => {
@@ -85,14 +127,14 @@ export class TelemetryService {
   }
 
   private async push() {
-    const cpuLoad = await getCpuLoad();
+    const [cpuLoad, battery] = await Promise.all([getCpuLoad(), getBattery()]);
     const socTemp = getSocTemp();
     const ramUsed = getRamUsed();
     const uptime  = Math.floor(os.uptime());
     const networkQuality = getNetworkQuality();
     const state = this.state.currentState;
 
-    const payload: RobotTelemetryData = { state, pingMs: this.lastPingMs, cpuLoad, socTemp, ramUsed, uptime, networkQuality };
+    const payload: RobotTelemetryData = { state, pingMs: this.lastPingMs, cpuLoad, socTemp, ramUsed, uptime, networkQuality, battery };
     this.socket.emit(RobotTelemetryEvent.Push, payload);
   }
 
