@@ -26,6 +26,13 @@ export class VideoService {
       `rpicam-vid -t 0 --codec h264 --width 640 --height 480 --framerate 24 --bitrate 1000000 --profile baseline --inline --intra 24 --flush -o - | ffmpeg-whip -fflags nobuffer+genpts+discardcorrupt -f h264 -r 24 -i - -c:v copy -map 0:v -bsf:v extract_extradata -ts_buffer_size 2000000 -f whip ${this.remoteConfig.whipUrl}`,
     );
 
+    this.process.stderr?.on('data', (data: Buffer) => {
+      for (const line of data.toString().split('\n')) {
+        const t = line.trim();
+        if (t && !/^#\d+/.test(t) && !/^frame=/.test(t)) this.log.info(`[ffmpeg] ${t}`);
+      }
+    });
+
     this.process.on('close', (code) => {
       this.process = null;
       if (code !== 0 && code !== null) {

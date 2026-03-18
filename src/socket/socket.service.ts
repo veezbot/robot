@@ -11,6 +11,7 @@ export class SocketService {
     bus: BusService,
     localConfig: LocalConfigService,
   ) {
+    console.log(`[SocketService] Connecting to ${localConfig.serverUrl}/robot`);
     this.socket = io(`${localConfig.serverUrl}/robot`, {
       auth: { token: localConfig.token },
       reconnection: false,
