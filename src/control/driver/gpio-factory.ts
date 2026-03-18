@@ -2,7 +2,9 @@ let GpioClass: new (pin: number, mode: string) => GpioHandle;
 
 try {
   GpioClass = require('pigpio').Gpio;
-} catch {
+  console.log('[gpio] pigpio loaded (hardware mode)');
+} catch (err) {
+  console.warn('[gpio] pigpio unavailable, using mock:', (err as Error).message);
   GpioClass = class MockGpio implements GpioHandle {
     constructor(private pin: number, private mode: string) {}
     digitalWrite(level: number) {

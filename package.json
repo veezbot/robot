@@ -9,6 +9,9 @@
 		"@veezbot/lib": "workspace:*",
 		"socket.io-client": "^4.8.3"
 	},
+	"optionalDependencies": {
+		"pigpio": "^3.3.1"
+	},
 	"devDependencies": {
 		"@types/node": "^20.11.27",
 		"tsc-watch": "^6.0.4",
