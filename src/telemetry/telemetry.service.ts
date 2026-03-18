@@ -42,8 +42,10 @@ async function getBattery(): Promise<BatteryData | null> {
         if (err2) return resolve(null);
         const busReg = swapBytes(rawV);
         const voltage = Math.round(((busReg >> 3) * 4) / 10) / 100; // V, 2 decimals
-        const current = Math.round(swapBytes(rawI) * 0.1);           // mA
-        resolve({ voltage, current });
+        let raw = swapBytes(rawI);
+        if (raw > 0x7FFF) raw -= 0x10000;                            // signed 16-bit
+        const current = Math.round(raw * 0.1);                       // mA
+        resolve({ voltage, current, charging: current < 0 });
       });
     });
   });
