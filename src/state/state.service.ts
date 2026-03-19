@@ -39,6 +39,7 @@ export class StateService {
   private wake(callback?: (result: ActionExecuteResponse) => void) {
     this.log.info('Robot waking up');
     this.currentState = 'wake';
+    this.control.start();
     this.video.start();
     callback?.({ data: {} });
   }

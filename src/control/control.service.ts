@@ -5,6 +5,7 @@ import { openPin, GpioHandle } from './driver/gpio-factory';
 
 export class ControlService {
   private readonly pins = new Map<number, GpioHandle>();
+  private active = false;
 
   constructor(socketService: SocketService, private readonly log: LogService) {
     socketService.on(RobotControlEvent.Pins, (payload: RobotPinOutputPayload) => {
@@ -18,6 +19,7 @@ export class ControlService {
   }
 
   private applyPins(commands: PinCommand[]) {
+    if (!this.active) return;
     for (const cmd of commands) {
       const pin = this.pin(cmd.pin);
       if (cmd.op === 'digital') pin.digitalWrite(cmd.value);
@@ -26,7 +28,14 @@ export class ControlService {
     }
   }
 
+  start() {
+    this.log.info('GPIO started');
+    this.active = true;
+  }
+
   stop() {
+    this.log.info('GPIO stopped');
+    this.active = false;
     for (const pin of this.pins.values()) {
       pin.digitalWrite(0);
     }
