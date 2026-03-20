@@ -8,19 +8,10 @@ interface ConfigFile {
   serverUrl?: string;
 }
 
-function fromEnvOrFile(key: string, file: ConfigFile): string {
-  const value = process.env[key] ?? file[key as keyof ConfigFile];
-  if (!value) throw new Error(`[LocalConfigService] Missing required config: ${key} (env or config file)`);
+function require_config(envKey: string, fileValue: string | undefined, label: string): string {
+  const value = process.env[envKey] ?? fileValue;
+  if (!value) throw new Error(`[LocalConfigService] Missing config: ${label}`);
   return value;
-}
-
-function buildServerUrl(file: ConfigFile): string {
-  if (process.env['SERVER_URL']) {
-    const port = process.env['SERVER_PORT'];
-    return port ? `http://${process.env['SERVER_URL']}:${port}` : `http://${process.env['SERVER_URL']}`;
-  }
-  if (file.serverUrl) return file.serverUrl;
-  throw new Error(`[LocalConfigService] Missing required config: serverUrl (env SERVER_URL or config file)`);
 }
 
 export class LocalConfigService {
@@ -29,8 +20,8 @@ export class LocalConfigService {
 
   constructor() {
     const file = this.loadFile();
-    this.token = fromEnvOrFile('token', file);
-    this.serverUrl = buildServerUrl(file);
+    this.token = require_config('TOKEN', file.token, 'token (env: TOKEN, file: token)');
+    this.serverUrl = require_config('SERVER_URL', file.serverUrl, 'serverUrl (env: SERVER_URL, file: serverUrl)');
     console.log(`[LocalConfigService] serverUrl=${this.serverUrl}`);
   }
 
