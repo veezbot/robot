@@ -8,7 +8,7 @@ Control your robot remotely — live video stream and real-time control from any
 
 ## What is VeezBot?
 
-VeezBot is an open platform to build your own remotely controlled robot. You connect a Raspberry Pi to the VeezBot server, and anyone you invite can drive it from a browser — no app required.
+VeezBot is an open platform to build your own remotely controlled robot. You connect a Raspberry Pi to the VeezBot server, and anyone you invite can drive it from a browser.
 
 - Live video stream (WebRTC)
 - Real-time control (keyboard, joystick, buttons)

@@ -8,6 +8,7 @@ import { SocketService } from './socket/socket.service';
 import { StateService } from './state/state.service';
 import { TelemetryService } from './telemetry/telemetry.service';
 import { VideoService } from './video/video.service';
+import { ChatService } from './chat/chat.service';
 
 const bus = new BusService();
 const localConfig = new LocalConfigService();
@@ -19,3 +20,4 @@ const video = new VideoService(remoteConfig, command, log);
 const control = new ControlService(socketService, log);
 const stateService = new StateService(socketService, video, control, log, bus);
 new TelemetryService(socketService, stateService);
+new ChatService(socketService, log);
