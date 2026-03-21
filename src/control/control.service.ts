@@ -3,9 +3,12 @@ import { LogService } from '../log/log.service';
 import { SocketService } from '../socket/socket.service';
 import { openPin, GpioHandle } from './driver/gpio-factory';
 
+const FAILSAFE_MS = 500;
+
 export class ControlService {
   private readonly pins = new Map<number, GpioHandle>();
-  private active = false;
+  private active        = false;
+  private failsafe:       NodeJS.Timeout | null = null;
 
   constructor(socketService: SocketService, private readonly log: LogService) {
     socketService.on(RobotControlEvent.Pins, (payload: RobotPinOutputPayload) => {
@@ -20,12 +23,25 @@ export class ControlService {
 
   private applyPins(commands: PinCommand[]) {
     if (!this.active) return;
+    this.resetFailsafe();
     for (const cmd of commands) {
       const pin = this.pin(cmd.pin);
       if (cmd.op === 'digital') pin.digitalWrite(cmd.value);
       else if (cmd.op === 'pwm') pin.pwmWrite(cmd.value);
       else if (cmd.op === 'servo') pin.servoWrite(cmd.pulseWidth);
     }
+  }
+
+  private resetFailsafe() {
+    if (this.failsafe) clearTimeout(this.failsafe);
+    this.failsafe = setTimeout(() => {
+      this.log.warn('Control failsafe triggered — stopping all pins');
+      this.stopPins();
+    }, FAILSAFE_MS);
+  }
+
+  private stopPins() {
+    for (const pin of this.pins.values()) pin.digitalWrite(0);
   }
 
   start() {
@@ -36,8 +52,7 @@ export class ControlService {
   stop() {
     this.log.info('GPIO stopped');
     this.active = false;
-    for (const pin of this.pins.values()) {
-      pin.digitalWrite(0);
-    }
+    if (this.failsafe) clearTimeout(this.failsafe);
+    this.stopPins();
   }
 }
