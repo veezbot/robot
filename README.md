@@ -27,11 +27,13 @@ VeezBot is an open platform to build your own remotely controlled robot. You con
 
 ## Getting started
 
-**1. Install**
+**1. On your Pi — initialize**
 ```bash
 git clone https://github.com/veezbot/robot.git
 cd robot
-npm install
+bash scripts/init.sh
+pnpm install
+pnpm build
 ```
 
 **2. Configure**
@@ -46,10 +48,40 @@ Create `/boot/veezbot.config.json` on your Pi (see `veezbot.config.json.example`
 
 **3. Run**
 ```bash
-npm start
+pnpm start
 ```
 
 Your robot will connect to the VeezBot server and appear in your dashboard.
+
+---
+
+## Development
+
+The build runs on your **dev machine** (TypeScript → `dist/`) and is deployed to the Pi over SSH.
+
+**Setup `scripts/.env`** (see `scripts/.env`):
+```bash
+PI_USER=pi
+PI_HOST=raspberrypi
+PI_PASS=yourpassword
+PI_DIR=/home/pi/veezbot-client
+```
+
+**Watch mode — auto-deploy on save**
+
+```bash
+pnpm dev:pi
+```
+
+On each save, TypeScript is compiled locally and `dist/` is rsynced to the Pi, which restarts the app automatically. `lib/` is watched too — any change to the shared contract triggers a redeploy.
+
+**One-off commands**
+
+| Command | Description |
+|--------------------------------|----------------------------------------------|
+| `pnpm deploy:dist` | Build and push `dist/` to the Pi |
+| `pnpm deploy:ffmpeg` | Push the custom `ffmpeg-whip` binary to the Pi |
+| `pnpm run init:pi` | Run `init.sh` on the Pi remotely (first setup) |
 
 ---
 

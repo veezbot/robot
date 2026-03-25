@@ -1,10 +1,12 @@
 {
 	"name": "@veezbot/robot",
 	"scripts": {
-		"dev": "tsc-watch --onSuccess \"node --enable-source-maps ./dist/main.js\"",
-		"dev:debug": "tsc-watch --onSuccess \"node --inspect=0.0.0.0:9229 --enable-source-maps ./dist/main.js\"",
-		"dev:pi": "tsc-watch --onSuccess \"bash -c '. ../scripts/config.sh && SERVER_URL=\\$DEV_HOST node --enable-source-maps ./dist/main.js'\"",
-		"dev:pi:debug": "tsc-watch --onSuccess \"bash -c '. ../scripts/config.sh && SERVER_URL=\\$DEV_HOST node --inspect=0.0.0.0:9229 --enable-source-maps ./dist/main.js'\""
+        "init:pi": "bash scripts/remote-init.sh",
+        "deploy:ffmpeg": "bash scripts/remote-deploy-ffmpeg.sh",
+		"build": "tsc",
+        "deploy:dist": "bash scripts/remote-deploy-dist.sh",
+        "start": "bash scripts/run.sh",
+		"dev:pi": "bash scripts/remote-dev.sh"
 	},
 	"dependencies": {
 		"@veezbot/robot-lib": "workspace:*",
@@ -18,5 +20,8 @@
 		"@types/node": "^20.11.27",
 		"tsc-watch": "^6.0.4",
 		"typescript": "^5.9.3"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": ["pigpio", "i2c-bus"]
 	}
 }
