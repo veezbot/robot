@@ -1,7 +1,7 @@
 import { BusService } from '../bus/bus.service';
 import { SocketService } from '../socket/socket.service';
 import { BusEvent } from '../bus/bus.events';
-import { RobotConfigEvent, RobotConfigPayload } from "@veezbot/lib";
+import { RobotConfigEvent, type RobotConfigGetResponse } from "@veezbot/robot-lib";
 
 export class RemoteConfigService {
   robotId!: string;
@@ -16,7 +16,7 @@ export class RemoteConfigService {
     bus: BusService,
   ) {
     const fetchConfig = () => {
-      socketService.emit(RobotConfigEvent.Get, undefined, (res: RobotConfigPayload[typeof RobotConfigEvent.Get]) => {
+      socketService.emit(RobotConfigEvent.Get, undefined, (res: RobotConfigGetResponse) => {
         if (res.error) throw new Error(res.error);
         this.robotId = res.data!.robotId;
         this.mediamtxUrl = res.data!.mediamtxUrl;

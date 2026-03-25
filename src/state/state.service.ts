@@ -1,4 +1,4 @@
-import { Action, ActionEvent, ActionExecutePayload, ActionExecuteResponse, RobotState } from '@veezbot/lib';
+import { Action, ActionEvent, ActionExecutePayload, ActionExecuteResponse, RobotState } from '@veezbot/robot-lib';
 import { BusService } from '../bus/bus.service';
 import { LogService } from '../log/log.service';
 import { SocketService } from '../socket/socket.service';

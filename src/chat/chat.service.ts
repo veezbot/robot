@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
-import { RobotChatEvent, ChatMessagePayload } from '@veezbot/lib';
+import { RobotChatEvent, ChatMessagePayload } from '@veezbot/robot-lib';
 import { SocketService } from '../socket/socket.service';
 import { LogService } from '../log/log.service';
 

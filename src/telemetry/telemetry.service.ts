@@ -1,6 +1,6 @@
 import * as os from 'os';
 import { readFileSync } from 'fs';
-import { RobotLatencyEvent, RobotTelemetryEvent, type BatteryData, type RobotTelemetryData } from '@veezbot/lib';
+import { RobotLatencyEvent, RobotTelemetryEvent, type BatteryData, type RobotTelemetryData } from '@veezbot/robot-lib';
 import { SocketService } from '../socket/socket.service';
 import { StateService } from '../state/state.service';
 

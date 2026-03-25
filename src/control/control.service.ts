@@ -1,4 +1,4 @@
-import { RobotControlEvent, RobotPinOutputPayload, PinCommand } from '@veezbot/lib';
+import { RobotControlEvent, RobotPinOutputPayload, PinCommand } from '@veezbot/robot-lib';
 import { LogService } from '../log/log.service';
 import { SocketService } from '../socket/socket.service';
 import { openPin, GpioHandle } from './driver/gpio-factory';

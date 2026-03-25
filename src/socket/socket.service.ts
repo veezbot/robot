@@ -1,5 +1,6 @@
 import { io, Socket } from 'socket.io-client';
-import { ErrorCode, ErrorMessage } from '@veezbot/lib';
+
+import { ErrorCode } from '@veezbot/robot-lib';
 import { BusService } from '../bus/bus.service';
 import { BusEvent } from '../bus/bus.events';
 import { LocalConfigService } from '../config/local-config.service';
@@ -30,7 +31,7 @@ export class SocketService {
 
     this.socket.on('connect_error', (error: Error) => {
       console.log('[SocketService] Error!', error.message);
-      const fatal = error.message === ErrorMessage[ErrorCode.InvalidToken] || error.message === ErrorMessage[ErrorCode.MissingToken];
+      const fatal = error.message === ErrorCode.InvalidToken || error.message === ErrorCode.MissingToken;
       if (fatal) {
         console.error('[SocketService] Fatal auth error, not retrying');
       } else {
