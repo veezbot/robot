@@ -5,10 +5,10 @@ import { RobotConfigEvent, type RobotConfigGetResponse } from "@veezbot/robot-li
 
 export class RemoteConfigService {
   robotId!: string;
-  mediamtxUrl!: string;
+  streamUrl!: string;
 
   get whipUrl(): string {
-    return `${this.mediamtxUrl}/robot/${this.robotId}/whip`;
+    return `${this.streamUrl}/robot/${this.robotId}/whip`;
   }
 
   constructor(
@@ -19,7 +19,7 @@ export class RemoteConfigService {
       socketService.emit(RobotConfigEvent.Get, undefined, (res: RobotConfigGetResponse) => {
         if (res.error) throw new Error(res.error);
         this.robotId = res.data!.robotId;
-        this.mediamtxUrl = res.data!.mediamtxUrl;
+        this.streamUrl = res.data!.streamUrl;
         console.log('[RemoteConfigService] Config init', { robotId: this.robotId, whipUrl: this.whipUrl });
         bus.emit(BusEvent.ConfigReady);
       });

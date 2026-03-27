@@ -14,9 +14,9 @@ export interface RobotConfig {
 
 // Payload the server sends back on config:get ack
 export interface RobotConfigInit {
-  robotId:     string;
-  mediamtxUrl: string;
-  config:      RobotConfig;
+  robotId:   string;
+  streamUrl: string;
+  config:    RobotConfig;
 }
 
 export type RobotConfigGetResponse = WsResponse<RobotConfigInit>;
