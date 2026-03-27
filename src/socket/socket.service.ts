@@ -15,7 +15,11 @@ export class SocketService {
     console.log(`[SocketService] Connecting to ${localConfig.serverUrl}/robot`);
     this.socket = io(`${localConfig.serverUrl}/robot`, {
       auth: { token: localConfig.token },
-      reconnection: false,
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionDelay: 3_000,
+      reconnectionDelayMax: 10_000,
+      reconnectionAttempts: Infinity,
     });
 
     this.socket.on('connect', () => {
@@ -23,19 +27,17 @@ export class SocketService {
       bus.emit(BusEvent.SocketConnected);
     });
 
-    this.socket.on('disconnect', () => {
-      console.log('[SocketService] Disconnected!');
+    this.socket.on('disconnect', (reason) => {
+      console.log('[SocketService] Disconnected!', reason);
       bus.emit(BusEvent.SocketDisconnected);
-      this.socket.connect();
     });
 
     this.socket.on('connect_error', (error: Error) => {
       console.log('[SocketService] Error!', error.message);
       const fatal = error.message === ErrorCode.InvalidToken || error.message === ErrorCode.MissingToken;
       if (fatal) {
-        console.error('[SocketService] Fatal auth error, not retrying');
-      } else {
-        setTimeout(() => this.socket.connect(), 3_000);
+        console.error('[SocketService] Fatal auth error, exiting');
+        process.exit(1);
       }
     });
   }
