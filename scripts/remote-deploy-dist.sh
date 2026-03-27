@@ -1,9 +1,14 @@
 #!/bin/bash
 # Run FROM dev machine. Rsyncs dist/ to the Pi and signals a restart.
+# Skips gracefully if Pi is offline.
 # Usage: bash scripts/remote-deploy-dist.sh
-set -e
 
 set -a; [ -f "$(dirname "$0")/.env" ] && source "$(dirname "$0")/.env"; set +a
+
+if ! sshpass -p "$PI_PASS" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=3 "$PI_USER@$PI_HOST" true 2>/dev/null; then
+  echo "==> Pi offline, skipping deploy."
+  exit 0
+fi
 
 ROBOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 SSH="sshpass -p $PI_PASS ssh -o StrictHostKeyChecking=no $PI_USER@$PI_HOST"
@@ -26,6 +31,8 @@ if ! sshpass -p "$PI_PASS" ssh -o StrictHostKeyChecking=no "$PI_USER@$PI_HOST" "
   sshpass -p "$PI_PASS" ssh -o StrictHostKeyChecking=no "$PI_USER@$PI_HOST" \
     "export NVM_DIR=\$HOME/.nvm; [ -s \$NVM_DIR/nvm.sh ] && source \$NVM_DIR/nvm.sh; export PATH=\$HOME/.local/share/pnpm:\$PATH; cd $PI_DIR && pnpm install --frozen-lockfile && npm rebuild pigpio i2c-bus --prefix ."
 fi
+
+$SSH "mkdir -p $PI_DIR/dist $PI_DIR/lib/dist"
 
 echo "==> Syncing lib/dist/..."
 sshpass -p "$PI_PASS" rsync -e "ssh -o StrictHostKeyChecking=no" -az --delete \
