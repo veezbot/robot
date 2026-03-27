@@ -1,7 +1,5 @@
 let GpioClass: new (pin: number, mode: string) => GpioHandle;
 
-console.log('[gpio] loading gpio driver', process.env['MOCK_GPIO']);
-
 if (process.env['MOCK_GPIO'] === 'true') {
   console.log('[gpio] MOCK_GPIO=true, using mock');
   GpioClass = class MockGpio implements GpioHandle {

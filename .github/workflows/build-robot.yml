@@ -1,0 +1,61 @@
+name: Build & Release Robot
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Tag
+        run: |
+          VERSION="$(date '+%Y-%m-%d_%H-%M')"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          git config user.name  "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag "$VERSION"
+          git push origin "$VERSION"
+
+      - name: Build
+        run: |
+          VERSION_DISPLAY="${{ env.VERSION }} · sha:$(git rev-parse --short HEAD)"
+          printf "export const VERSION_TAG = '%s';\nexport const VERSION_DISPLAY = '%s';\n" \
+            "${{ env.VERSION }}" "$VERSION_DISPLAY" > src/version.ts
+
+          pnpm --filter @veezbot/robot-lib build
+          pnpm --filter @veezbot/robot      build
+
+      - name: Package
+        run: |
+          mkdir -p _release/lib
+          cp -r dist               _release/
+          cp -r lib/dist           _release/lib/
+          cp    package.json       _release/
+          cp    lib/package.json   _release/lib/
+
+          tar -czf "robot-${{ env.VERSION }}.tar.gz" -C _release .
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: ${{ env.VERSION }}
+          files: robot-${{ env.VERSION }}.tar.gz
+          draft: true
