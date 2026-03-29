@@ -51,6 +51,7 @@ export class VideoService {
       return;
     }
     await this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; pkill -f libcamera; true');
+    this.process = null;
   }
 
   private spawnProcess() {
