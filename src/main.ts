@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import { VERSION_DISPLAY } from './version';
 import { BusService } from './bus/bus.service';
 import { CommandService } from './command/command.service';
@@ -14,6 +15,9 @@ import { LatencyService } from './latency/latency.service';
 
 const log = new LogService();
 log.info(`VeezBot Robot ${VERSION_DISPLAY}`);
+
+// Kill any orphan camera processes from previous runs before acquiring the hardware
+try { execSync('pkill -f rpicam-vid; pkill -f ffmpeg-whip; pkill -f libcamera'); } catch {}
 
 const bus = new BusService();
 const localConfig = new LocalConfigService();

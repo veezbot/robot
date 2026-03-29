@@ -9,6 +9,6 @@ export class BusService {
 
   emit(event: string, data?: unknown) {
     this.emitter.emit(event, data);
-    console.log(`[BusService] ${event}`);
+    // console.log(`[BusService] ${event}`);
   }
 }
