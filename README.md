@@ -70,7 +70,7 @@ PI_DIR=/home/pi/veezbot-client
 **Watch mode — auto-deploy on save**
 
 ```bash
-pnpm dev:pi
+pnpm dev:remote
 ```
 
 On each save, TypeScript is compiled locally and `dist/` is rsynced to the Pi, which restarts the app automatically. `lib/` is watched too — any change to the shared contract triggers a redeploy.
