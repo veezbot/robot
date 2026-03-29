@@ -34,7 +34,7 @@ export class VideoService {
       this.log.info('Video stream already running');
       return;
     }
-    await this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; true');
+    await this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; pkill -f libcamera; true');
     this.log.info('Starting video stream');
     this.spawnProcess();
     this.resetFailsafe();
@@ -50,7 +50,7 @@ export class VideoService {
       this.log.info('No video stream to stop');
       return;
     }
-    await this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; true');
+    await this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; pkill -f libcamera; true');
   }
 
   private spawnProcess() {
@@ -85,7 +85,7 @@ export class VideoService {
     this.failsafe = setTimeout(() => {
       this.failsafe = null;
       this.log.warn('Video failsafe triggered — stopping stream');
-      this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; true');
+      this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; pkill -f libcamera; true');
       this.process = null;
     }, FAILSAFE_MS);
   }
