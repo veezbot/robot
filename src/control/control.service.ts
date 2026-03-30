@@ -19,14 +19,13 @@ export class ControlService {
     private readonly remoteConfig: RemoteConfigService,
     private readonly log: LogService,
   ) {
-    bus.on(BusEvent.ConfigReady, () => this.initPins());
     bus.on(BusEvent.Heartbeat, () => { if (this.active) this.resetFailsafe(); });
     socketService.on(RobotControlEvent.Pins, (payload: RobotPinOutputPayload) => {
       this.applyPins(payload.pins);
     });
   }
 
-  private initPins() {
+  initPins() {
     this.pins.clear();
     for (const { pin, op } of this.remoteConfig.pins) {
       this.pins.set(pin, new Pin(pin, op));

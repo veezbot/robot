@@ -50,6 +50,15 @@ export class SocketService {
     }
   }
 
+  rpc<T>(event: string, data?: unknown, timeoutMs = 5_000): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.socket.timeout(timeoutMs).emit(event, data, (err: Error | null, res: T) => {
+        if (err) reject(err);
+        else resolve(res);
+      });
+    });
+  }
+
   on(event: string, handler: (...args: any[]) => void) {
     this.socket.on(event, handler);
   }

@@ -6,13 +6,22 @@ import { SocketService } from '../socket/socket.service';
 const PING_INTERVAL_MS = 200;
 
 export class LatencyService {
-  constructor(socketService: SocketService, bus: BusService) {
-    bus.on(BusEvent.SocketConnected, () => {
-      setInterval(() => {
-        socketService.emit(RobotLatencyEvent.Ping, undefined, () => {
-          bus.emit(BusEvent.Heartbeat, undefined);
-        });
-      }, PING_INTERVAL_MS);
-    });
+  private interval: NodeJS.Timeout | null = null;
+
+  constructor(private readonly socket: SocketService, private readonly bus: BusService) {}
+
+  start() {
+    if (this.interval) return;
+    this.interval = setInterval(() => {
+      this.socket.emit(RobotLatencyEvent.Ping, undefined, () => {
+        this.bus.emit(BusEvent.Heartbeat);
+      });
+    }, PING_INTERVAL_MS);
+  }
+
+  stop() {
+    if (!this.interval) return;
+    clearInterval(this.interval);
+    this.interval = null;
   }
 }

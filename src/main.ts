@@ -19,14 +19,14 @@ log.info(`VeezBot Robot ${VERSION_DISPLAY}`);
 // Kill any orphan camera processes from previous runs before acquiring the hardware
 try { execSync('pkill -f rpicam-vid; pkill -f ffmpeg-whip; pkill -f libcamera'); } catch {}
 
-const bus = new BusService();
-const localConfig = new LocalConfigService();
-const socketService = new SocketService(bus, localConfig);
-const command = new CommandService();
-const remoteConfig = new RemoteConfigService(socketService, bus);
-const video = new VideoService(remoteConfig, command, bus, log);
-const control = new ControlService(socketService, bus, remoteConfig, log);
-const stateService = new StateService(socketService, video, control, log, bus);
-new LatencyService(socketService, bus);
-new TelemetryService(socketService, stateService);
-new ChatService(socketService, log);
+const bus          = new BusService();
+const localConfig  = new LocalConfigService();
+const socket       = new SocketService(bus, localConfig);
+const command      = new CommandService();
+const remoteConfig = new RemoteConfigService(socket);
+const video        = new VideoService(remoteConfig, command, bus, log);
+const control      = new ControlService(socket, bus, remoteConfig, log);
+const latency      = new LatencyService(socket, bus);
+const state        = new StateService(socket, remoteConfig, control, latency, video, log, bus);
+new TelemetryService(socket, state, bus);
+new ChatService(socket, log);

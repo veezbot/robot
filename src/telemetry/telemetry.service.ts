@@ -3,6 +3,8 @@ import { readFileSync } from 'fs';
 import { RobotLatencyEvent, RobotTelemetryEvent, type BatteryData, type RobotTelemetryData } from '@veezbot/robot-lib';
 import { SocketService } from '../socket/socket.service';
 import { StateService } from '../state/state.service';
+import { BusService } from '../bus/bus.service';
+import { BusEvent } from '../bus/bus.events';
 
 const INTERVAL_MS = 2_000;
 const CPU_SAMPLE_MS = 1_000;
@@ -117,8 +119,10 @@ export class TelemetryService {
   constructor(
     private readonly socket: SocketService,
     private readonly state: StateService,
+    readonly bus: BusService,
   ) {
-    this.start();
+    bus.on(BusEvent.SocketConnected,    () => this.start());
+    bus.on(BusEvent.SocketDisconnected, () => this.stop());
   }
 
   private measurePing() {
