@@ -1,4 +1,4 @@
-export type RobotState = 'wake' | 'sleep' | 'error';
+export type RobotStatus = 'connecting' | 'sleeping' | 'awake' | 'error';
 
 export interface BatteryData {
   voltage:  number;  // V
@@ -7,7 +7,8 @@ export interface BatteryData {
 }
 
 export interface RobotTelemetryData {
-  state:          RobotState;
+  status:         RobotStatus;
+  error:          string | null;
   pingMs:         number;  // RTT to server in ms
   cpuLoad:        number;  // 0–100 %
   socTemp:        number;  // °C
