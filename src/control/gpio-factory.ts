@@ -1,7 +1,7 @@
 let GpioClass: new (pin: number, mode: string) => GpioHandle;
 
-if (process.env['MOCK_GPIO'] === 'true') {
-  console.log('[gpio] MOCK_GPIO=true, using mock');
+if (process.env['MOCK'] === 'true') {
+  console.log('[gpio] MOCK=true, using mock');
   GpioClass = class MockGpio implements GpioHandle {
     constructor(_pin: number, _mode: string) {}
     digitalWrite(_level: number) {}

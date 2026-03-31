@@ -6,6 +6,7 @@ import { BusEvent } from '../bus/bus.events';
 import { LogService } from '../log/log.service';
 
 const FAILSAFE_MS = 2000;
+const MOCK = process.env['MOCK'] === 'true';
 
 export class VideoService {
   private process:  ChildProcess | null = null;
@@ -19,7 +20,7 @@ export class VideoService {
     private readonly log: LogService,
   ) {
     bus.on(BusEvent.Heartbeat, () => {
-      if (!this.active) return;
+      if (!this.active || MOCK) return;
       this.resetFailsafe();
       if (!this.process) {
         this.log.info('Video stream: heartbeat resumed, restarting');
@@ -30,6 +31,10 @@ export class VideoService {
 
   async start(): Promise<void> {
     this.active = true;
+    if (MOCK) {
+      this.log.info('Video stream: mock mode, skipping');
+      return;
+    }
     if (this.process) {
       this.log.info('Video stream already running');
       return;
