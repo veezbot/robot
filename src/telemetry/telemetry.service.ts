@@ -27,8 +27,8 @@ try {
   // Write calibration register (big-endian: 0x0010 in SMBus word = 0x1000 on chip)
   bus.writeWordSync(INA219_ADDR, REG_CAL, INA219_CAL);
   i2cBus = bus;
-} catch {
-  // i2c-bus not available (dev machine) or hardware not present
+} catch (err) {
+  console.warn(`[TelemetryService] I2C/INA219 unavailable: ${(err as Error).message}`);
 }
 
 function swapBytes(val: number): number {
