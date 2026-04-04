@@ -1,6 +1,6 @@
 import * as os from 'os';
 import { readFileSync } from 'fs';
-import { RobotLatencyEvent, RobotTelemetryEvent, type BatteryData, type RobotTelemetryData } from '@veezbot/robot-lib';
+import { RobotLatencyEvent, RobotTelemetryEvent, type BatteryData, type RobotTelemetryData, type NetworkQuality } from '@veezbot/robot-lib';
 import { SocketService } from '../socket/socket.service';
 import { StateService } from '../state/state.service';
 import { BusService } from '../bus/bus.service';
@@ -91,21 +91,20 @@ function getRamUsed(): number {
   return Math.round((1 - free / total) * 100);
 }
 
-function getNetworkQuality(): RobotTelemetryData['networkQuality'] {
+function getNetworkQuality(): NetworkQuality | null {
   try {
     const content = readFileSync('/proc/net/wireless', 'utf8');
     // Lines: header, header, wlan0: status link level noise ...
     const line = content.split('\n').find((l) => l.includes(':') && !l.includes('Inter'));
-    if (!line) return 'poor';
+    if (!line) return null;
     // level column is the 4th value after the interface name (strip trailing dot)
     const parts = line.split(':')[1].trim().split(/\s+/);
     const dbm = parseFloat(parts[2]); // signal level in dBm
-    if (dbm >= -50) return 'excellent';
-    if (dbm >= -60) return 'good';
-    if (dbm >= -70) return 'fair';
-    return 'poor';
+    // Map dBm range [-90, -30] to [0, 100]%
+    const percent = Math.round(Math.min(100, Math.max(0, (dbm + 90) / 60 * 100)));
+    return { dbm: Math.round(dbm), percent };
   } catch {
-    return 'good'; // fallback for wired / unavailable
+    return null; // wired or unavailable
   }
 }
 

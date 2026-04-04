@@ -6,6 +6,11 @@ export interface BatteryData {
   charging: boolean;
 }
 
+export interface NetworkQuality {
+  dbm:     number;  // signal level in dBm
+  percent: number;  // 0–100 %
+}
+
 export interface RobotTelemetryData {
   status:         RobotStatus;
   error:          string | null;
@@ -14,7 +19,7 @@ export interface RobotTelemetryData {
   socTemp:        number;  // °C
   ramUsed:        number;  // 0–100 %
   uptime:         number;  // seconds
-  networkQuality: 'excellent' | 'good' | 'fair' | 'poor';
+  networkQuality: NetworkQuality | null;
   battery:        BatteryData | null;
 }
 
