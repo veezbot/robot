@@ -10,20 +10,6 @@ ROBOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 prefix() { sed -u "s/^/[$1] /"; }
 
-CLEANING=0
-cleanup() {
-  [ "$CLEANING" = "1" ] && return
-  CLEANING=1
-  echo ""
-  echo "==> Stopping..."
-  kill $(jobs -p) 2>/dev/null || true
-  sshpass -p "$PI_PASS" ssh -o StrictHostKeyChecking=no "$PI_USER@$PI_HOST" \
-    "sudo systemctl stop veezbot 2>/dev/null || true" 2>/dev/null || true
-  wait 2>/dev/null || true
-  stty sane </dev/tty 2>/dev/null || true
-}
-trap cleanup EXIT INT TERM
-
 # 1. Watch lib/ → build lib/dist/ locally → sync + restart on Pi
 (cd "$ROBOT_DIR/lib" && pnpm exec tsup src/index.ts --format cjs,esm --dts --watch --onSuccess "bash $SCRIPT_DIR/remote-deploy-dist.sh" 2>&1 | prefix lib) &
 
