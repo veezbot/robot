@@ -46,10 +46,12 @@ Create `/boot/veezbot.config.json` on your Pi (see `veezbot.config.json.example`
 }
 ```
 
-**3. Run**
+**3. Install as a systemd service**
 ```bash
-pnpm start
+pnpm install:service
 ```
+
+The robot will start automatically on boot and restart on failure. Logs: `journalctl -u veezbot -f`.
 
 Your robot will connect to the VeezBot server and appear in your dashboard.
 
@@ -69,19 +71,23 @@ PI_DIR=/home/pi/veezbot-client
 
 **Watch mode — auto-deploy on save**
 
+From the workspace root, with `SERVER_URL` and `TOKEN` set in `.env`:
 ```bash
-pnpm dev:remote
+pnpm dev:robot:remote
 ```
 
-On each save, TypeScript is compiled locally and `dist/` is rsynced to the Pi, which restarts the app automatically. `lib/` is watched too — any change to the shared contract triggers a redeploy.
+On each save, TypeScript is compiled locally, `dist/` is rsynced to the Pi, `/boot/veezbot.config.json` is updated with the dev `SERVER_URL` and `TOKEN`, and the systemd service is restarted automatically. `lib/` is watched too — any change to the shared contract triggers a redeploy.
+
+When you stop the watcher (`Ctrl+C`), the service is stopped on the Pi.
 
 **One-off commands**
 
 | Command | Description |
-|--------------------------------|----------------------------------------------|
+|---|---|
 | `pnpm deploy:dist` | Build and push `dist/` to the Pi |
 | `pnpm deploy:ffmpeg` | Push the custom `ffmpeg-whip` binary to the Pi |
 | `pnpm run init:pi` | Run `init.sh` on the Pi remotely (first setup) |
+| `pnpm install:service` | Install and enable the systemd service on the Pi |
 
 ---
 

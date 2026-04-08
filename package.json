@@ -2,6 +2,8 @@
 	"name": "@veezbot/robot",
 	"scripts": {
         "init:pi": "bash scripts/remote-init.sh",
+        "install:service": "bash scripts/remote-install-service.sh",
+        "wifi:add": "bash scripts/remote-wifi.sh",
         "deploy:ffmpeg": "bash scripts/remote-deploy-ffmpeg.sh",
 		"build": "tsc",
         "deploy:dist": "bash scripts/remote-deploy-dist.sh",

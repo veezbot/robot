@@ -13,8 +13,8 @@ fi
 ROBOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 SSH="sshpass -p $PI_PASS ssh -o StrictHostKeyChecking=no $PI_USER@$PI_HOST"
 
-echo "==> Killing app on Pi..."
-$SSH "sudo pkill -f '[n]ode.*dist/main.js' || true" || true
+echo "==> Stopping app on Pi..."
+$SSH "sudo systemctl stop veezbot 2>/dev/null || sudo pkill -f '[n]ode.*dist/main.js' || true" || true
 
 # First deploy: install deps if node_modules is missing
 if ! sshpass -p "$PI_PASS" ssh -o StrictHostKeyChecking=no "$PI_USER@$PI_HOST" "[ -d $PI_DIR/node_modules ]"; then
@@ -45,7 +45,12 @@ sshpass -p "$PI_PASS" rsync -e "ssh -o StrictHostKeyChecking=no" -az --delete \
 echo "==> Waiting for port 8888 to clear..."
 $SSH "sudo fuser -k 8888/tcp 2>/dev/null || true; while sudo ss -tlnp | grep -q ':8888'; do sleep 0.2; done" || true
 
-echo "==> Writing .deploy-ready..."
-$SSH "touch $PI_DIR/.deploy-ready"
+if [ -n "$TOKEN" ] && [ -n "$SERVER_URL" ]; then
+  echo "==> Writing /boot/veezbot.config.json..."
+  $SSH "printf '{\"token\":\"%s\",\"serverUrl\":\"%s\"}\n' \"$TOKEN\" \"$SERVER_URL\" | sudo tee /boot/veezbot.config.json > /dev/null"
+fi
+
+echo "==> Starting app on Pi..."
+$SSH "sudo systemctl start veezbot 2>/dev/null || true" || true
 
 echo "==> Done."

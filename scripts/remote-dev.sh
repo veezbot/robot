@@ -18,7 +18,7 @@ cleanup() {
   echo "==> Stopping..."
   kill $(jobs -p) 2>/dev/null || true
   sshpass -p "$PI_PASS" ssh -o StrictHostKeyChecking=no "$PI_USER@$PI_HOST" \
-    "sudo pkill -f '[n]ode.*dist/main.js' 2>/dev/null || true" 2>/dev/null || true
+    "sudo systemctl stop veezbot 2>/dev/null || true" 2>/dev/null || true
   wait 2>/dev/null || true
   stty sane </dev/tty 2>/dev/null || true
 }
@@ -29,18 +29,5 @@ trap cleanup EXIT INT TERM
 
 # 2. Watch robot/ → build dist/ locally → sync + restart on Pi
 (cd "$ROBOT_DIR" && pnpm exec tsc-watch --onSuccess "bash $SCRIPT_DIR/remote-deploy-dist.sh" 2>&1 | prefix robot) &
-
-# 3. Loop: wait for .deploy-ready signal then start node on Pi
-(while true; do
-  if ! sshpass -p "$PI_PASS" ssh -o StrictHostKeyChecking=no "$PI_USER@$PI_HOST" "[ -f $PI_DIR/.deploy-ready ]" 2>/dev/null; then
-    echo "Waiting .deploy-ready..."
-    sleep 0.5
-    continue
-  fi
-  sshpass -p "$PI_PASS" ssh -o StrictHostKeyChecking=no "$PI_USER@$PI_HOST" "rm -f $PI_DIR/.deploy-ready" 2>/dev/null || true
-  echo "Starting..."
-  bash "$SCRIPT_DIR/remote-start.sh" 2>&1 || true
-  sleep 1
-done) | prefix pi
 
 wait
