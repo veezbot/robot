@@ -27,8 +27,10 @@ export class ControlService {
 
   initPins() {
     this.pins.clear();
-    for (const { pin, op } of this.remoteConfig.pins) {
-      this.pins.set(pin, new Pin(pin, op));
+    for (const { pin, op, defaultValue } of this.remoteConfig.pins) {
+      const p = new Pin(pin, op);
+      p.reset(defaultValue);
+      this.pins.set(pin, p);
     }
     this.log.info(`Control pins initialized: ${this.remoteConfig.pins.map((p) => `${p.pin}(${p.op})`).join(', ')}`);
   }

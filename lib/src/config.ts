@@ -7,8 +7,9 @@ export const RobotConfigEvent = {
 export type PinOp = 'digital' | 'pwm' | 'servo';
 
 export interface PinConfig {
-  pin: number;
-  op:  PinOp;
+  pin:          number;
+  op:           PinOp;
+  defaultValue: number;
 }
 
 // Lean config — only what the robot needs at runtime

@@ -21,7 +21,11 @@ export class Pin {
     write[cmd.op](this.handle, value);
   }
 
+  reset(value = 0) {
+    write[this.op](this.handle, value);
+  }
+
   stop() {
-    write[this.op](this.handle, 0);
+    this.reset(0);
   }
 }
