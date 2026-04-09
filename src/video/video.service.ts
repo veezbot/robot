@@ -1,33 +1,19 @@
 import { ChildProcess } from 'child_process';
 import { RemoteConfigService } from '../config/remote-config.service';
 import { CommandService } from '../command/command.service';
-import { BusService } from '../bus/bus.service';
-import { BusEvent } from '../bus/bus.events';
 import { LogService } from '../log/log.service';
 
-const FAILSAFE_MS = 2000;
 const MOCK = process.env['MOCK'] === 'true';
 
 export class VideoService {
-  private process:  ChildProcess | null = null;
-  private active    = false;
-  private failsafe: NodeJS.Timeout | null = null;
+  private process: ChildProcess | null = null;
+  private active   = false;
 
   constructor(
     private readonly remoteConfig: RemoteConfigService,
     private readonly command: CommandService,
-    bus: BusService,
     private readonly log: LogService,
-  ) {
-    bus.on(BusEvent.Heartbeat, () => {
-      if (!this.active || MOCK) return;
-      this.resetFailsafe();
-      if (!this.process) {
-        this.log.info('Video stream: heartbeat resumed, restarting');
-        this.spawnProcess();
-      }
-    });
-  }
+  ) {}
 
   async start(): Promise<void> {
     this.active = true;
@@ -42,15 +28,10 @@ export class VideoService {
     await this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; pkill -f libcamera; true');
     this.log.info('Starting video stream');
     this.spawnProcess();
-    this.resetFailsafe();
   }
 
   async stop(): Promise<void> {
     this.active = false;
-    if (this.failsafe) {
-      clearTimeout(this.failsafe);
-      this.failsafe = null;
-    }
     if (!this.process) {
       this.log.info('No video stream to stop');
       return;
@@ -86,13 +67,4 @@ export class VideoService {
     });
   }
 
-  private resetFailsafe() {
-    if (this.failsafe) clearTimeout(this.failsafe);
-    this.failsafe = setTimeout(() => {
-      this.failsafe = null;
-      this.log.warn('Video failsafe triggered — stopping stream');
-      this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; pkill -f libcamera; true');
-      this.process = null;
-    }, FAILSAFE_MS);
-  }
 }
