@@ -5,6 +5,9 @@ import { LogService } from '../log/log.service';
 
 const MOCK          = process.env['MOCK'] === 'true';
 const RESTART_DELAY = 3_000;
+const KILL_CMD      = 'pkill -f rpicam-vid; pkill -f ffmpeg-whip; pkill -f libcamera; true';
+const STREAM_CMD    = (whipUrl: string) =>
+  `rpicam-vid -t 0 --codec h264 --width 640 --height 480 --framerate 24 --bitrate 1000000 --low-latency --profile baseline --inline --intra 24 --flush -o - | ffmpeg-whip -fflags nobuffer+genpts+discardcorrupt -f h264 -r 24 -i - -c:v copy -map 0:v -bsf:v extract_extradata -ts_buffer_size 2000000 -f whip ${whipUrl}`;
 
 export class VideoService {
   private process: ChildProcess | null = null;
@@ -22,23 +25,16 @@ export class VideoService {
       this.log.info('Video stream: mock mode, skipping');
       return;
     }
-    if (this.process) {
-      this.log.info('Video stream already running');
-      return;
-    }
-    await this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; pkill -f libcamera; true');
+    await this.stop();
+    this.active = true;
     this.log.info('Starting video stream');
     this.spawnProcess();
   }
 
   async stop(): Promise<void> {
     this.active = false;
-    if (!this.process) {
-      this.log.info('No video stream to stop');
-      return;
-    }
-    await this.command.run('pkill -f rpicam-vid; pkill -f ffmpeg-whip; pkill -f libcamera; true');
     this.process = null;
+    await this.command.run(KILL_CMD);
   }
 
   private scheduleRestart() {
@@ -48,9 +44,7 @@ export class VideoService {
   }
 
   private spawnProcess() {
-    this.process = this.command.spawn(
-      `rpicam-vid -t 0 --codec h264 --width 640 --height 480 --framerate 24 --bitrate 1000000 --low-latency --profile baseline --inline --intra 24 --flush -o - | ffmpeg-whip -fflags nobuffer+genpts+discardcorrupt -f h264 -r 24 -i - -c:v copy -map 0:v -bsf:v extract_extradata -ts_buffer_size 2000000 -f whip ${this.remoteConfig.whipUrl}`,
-    );
+    this.process = this.command.spawn(STREAM_CMD(this.remoteConfig.whipUrl));
 
     this.process.stderr?.on('data', (data: Buffer) => {
       for (const line of data.toString().split('\n')) {
