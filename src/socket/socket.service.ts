@@ -27,6 +27,8 @@ export class SocketService {
       bus.emit(BusEvent.SocketConnected);
     });
 
+    this.socket.io.engine.on('packetCreate', () => bus.emit(BusEvent.Heartbeat));
+
     this.socket.on('disconnect', (reason) => {
       console.log('[SocketService] Disconnected!', reason);
       bus.emit(BusEvent.SocketDisconnected);

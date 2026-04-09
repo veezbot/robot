@@ -14,7 +14,6 @@ export interface NetworkQuality {
 export interface RobotTelemetryData {
   status:         RobotStatus;
   error:          string | null;
-  pingMs:         number;  // RTT to server in ms
   cpuLoad:        number;  // 0–100 %
   socTemp:        number;  // °C
   ramUsed:        number;  // 0–100 %

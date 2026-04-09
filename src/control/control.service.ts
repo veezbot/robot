@@ -6,7 +6,7 @@ import { BusEvent } from '../bus/bus.events';
 import { RemoteConfigService } from '../config/remote-config.service';
 import { Pin } from './pin';
 
-const FAILSAFE_MS = 500;
+const FAILSAFE_MS = 1500;
 
 export class ControlService {
   private readonly pins = new Map<number, Pin>();

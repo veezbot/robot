@@ -1,6 +1,6 @@
 import * as os from 'os';
 import { readFileSync } from 'fs';
-import { RobotLatencyEvent, RobotTelemetryEvent, type BatteryData, type RobotTelemetryData, type NetworkQuality } from '@veezbot/robot-lib';
+import { RobotTelemetryEvent, type BatteryData, type RobotTelemetryData, type NetworkQuality } from '@veezbot/robot-lib';
 import { SocketService } from '../socket/socket.service';
 import { StateService } from '../state/state.service';
 import { BusService } from '../bus/bus.service';
@@ -108,12 +108,8 @@ function getNetworkQuality(): NetworkQuality | null {
   }
 }
 
-const PING_INTERVAL_MS = 3_000;
-
 export class TelemetryService {
   private telemetryInterval: ReturnType<typeof setInterval> | null = null;
-  private pingInterval: ReturnType<typeof setInterval> | null = null;
-  private lastPingMs = 0;
 
   constructor(
     private readonly socket: SocketService,
@@ -122,13 +118,6 @@ export class TelemetryService {
   ) {
     bus.on(BusEvent.SocketConnected,    () => this.start());
     bus.on(BusEvent.SocketDisconnected, () => this.stop());
-  }
-
-  private measurePing() {
-    const t = Date.now();
-    this.socket.emit(RobotLatencyEvent.Ping, undefined, () => {
-      this.lastPingMs = Date.now() - t;
-    });
   }
 
   private async push() {
@@ -140,19 +129,16 @@ export class TelemetryService {
     const status = this.state.status;
     const error  = this.state.lastError;
 
-    const payload: RobotTelemetryData = { status, error, pingMs: this.lastPingMs, cpuLoad, socTemp, ramUsed, uptime, networkQuality, battery };
+    const payload: RobotTelemetryData = { status, error, cpuLoad, socTemp, ramUsed, uptime, networkQuality, battery };
     this.socket.emit(RobotTelemetryEvent.Push, payload);
   }
 
   start() {
-    this.measurePing();
-    this.pingInterval = setInterval(() => this.measurePing(), PING_INTERVAL_MS);
     this.telemetryInterval = setInterval(() => this.push(), INTERVAL_MS);
     this.push();
   }
 
   stop() {
     if (this.telemetryInterval) { clearInterval(this.telemetryInterval); this.telemetryInterval = null; }
-    if (this.pingInterval)      { clearInterval(this.pingInterval);      this.pingInterval = null; }
   }
 }

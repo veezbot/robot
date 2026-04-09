@@ -5,7 +5,6 @@ import { LogService } from '../log/log.service';
 import { SocketService } from '../socket/socket.service';
 import { RemoteConfigService } from '../config/remote-config.service';
 import { ControlService } from '../control/control.service';
-import { LatencyService } from '../latency/latency.service';
 import { VideoService } from '../video/video.service';
 
 type State = 'sleeping' | 'waking' | 'awake' | 'sleeping-down' | 'error';
@@ -30,7 +29,6 @@ export class StateService {
     socketService: SocketService,
     private readonly remoteConfig: RemoteConfigService,
     private readonly control: ControlService,
-    private readonly latency: LatencyService,
     private readonly video: VideoService,
     private readonly log: LogService,
     bus: BusService,
@@ -59,7 +57,6 @@ export class StateService {
       await this.remoteConfig.fetch();
       this.control.initPins();
       this.control.start();
-      this.latency.start();
       await this.video.start();
       this.state = 'awake';
     } catch (e) {
@@ -73,7 +70,6 @@ export class StateService {
     if (this.state === 'sleeping' || this.state === 'sleeping-down') return;
     this.state = 'sleeping-down';
     try {
-      this.latency.stop();
       await this.video.stop();
       this.control.stop();
     } finally {

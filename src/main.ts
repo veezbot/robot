@@ -11,7 +11,6 @@ import { StateService } from './state/state.service';
 import { TelemetryService } from './telemetry/telemetry.service';
 import { VideoService } from './video/video.service';
 import { ChatService } from './chat/chat.service';
-import { LatencyService } from './latency/latency.service';
 
 const log = new LogService();
 log.info(`VeezBot Robot ${VERSION_DISPLAY}`);
@@ -26,7 +25,6 @@ const command      = new CommandService();
 const remoteConfig = new RemoteConfigService(socket);
 const video        = new VideoService(remoteConfig, command, log);
 const control      = new ControlService(socket, bus, remoteConfig, log);
-const latency      = new LatencyService(socket, bus);
-const state        = new StateService(socket, remoteConfig, control, latency, video, log, bus);
+const state        = new StateService(socket, remoteConfig, control, video, log, bus);
 new TelemetryService(socket, state, bus);
 new ChatService(socket, log);

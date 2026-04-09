@@ -5,4 +5,3 @@ export * from './telemetry';
 export * from './control';
 export * from './config';
 export * from './chat';
-export * from './latency';
