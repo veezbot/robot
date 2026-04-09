@@ -10,8 +10,9 @@ const STREAM_CMD    = (whipUrl: string) =>
   `rpicam-vid -t 0 --codec h264 --width 640 --height 480 --framerate 24 --bitrate 1000000 --low-latency --profile baseline --inline --intra 24 --flush -o - | ffmpeg-whip -fflags nobuffer+genpts+discardcorrupt -f h264 -r 24 -i - -c:v copy -map 0:v -bsf:v extract_extradata -ts_buffer_size 2000000 -f whip ${whipUrl}`;
 
 export class VideoService {
-  private process: ChildProcess | null = null;
-  private active   = false;
+  private process:      ChildProcess | null = null;
+  private active      = false;
+  private restartTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private readonly remoteConfig: RemoteConfigService,
@@ -34,13 +35,14 @@ export class VideoService {
   async stop(): Promise<void> {
     this.active = false;
     this.process = null;
+    if (this.restartTimer) { clearTimeout(this.restartTimer); this.restartTimer = null; }
     await this.command.run(KILL_CMD);
   }
 
   private scheduleRestart() {
     if (!this.active) return;
     this.log.info(`Restarting video stream in ${RESTART_DELAY}ms`);
-    setTimeout(() => { if (this.active) this.spawnProcess(); }, RESTART_DELAY);
+    this.restartTimer = setTimeout(() => { this.restartTimer = null; if (this.active) this.spawnProcess(); }, RESTART_DELAY);
   }
 
   private spawnProcess() {
