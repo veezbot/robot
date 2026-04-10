@@ -8,7 +8,7 @@ export class RemoteConfigService {
   audio: RobotConfig['audio'] = undefined;
 
   get whipUrl(): string {
-    return `${this.streamUrl}/robot/${this.robotId}/whip`;
+    return `${this.streamUrl}/robot/${this.robotId}/video/whip`;
   }
 
   get whipAudioUrl(): string {
