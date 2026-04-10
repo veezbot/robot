@@ -10,6 +10,7 @@ import { SocketService } from './socket/socket.service';
 import { StateService } from './state/state.service';
 import { TelemetryService } from './telemetry/telemetry.service';
 import { VideoService } from './video/video.service';
+import { AudioService } from './audio/audio.service';
 import { ChatService } from './chat/chat.service';
 
 const log = new LogService();
@@ -24,7 +25,8 @@ const socket       = new SocketService(bus, localConfig);
 const command      = new CommandService();
 const remoteConfig = new RemoteConfigService(socket);
 const video        = new VideoService(remoteConfig, command, log);
+const audio        = new AudioService(remoteConfig, command, log);
 const control      = new ControlService(socket, bus, remoteConfig, log);
-const state        = new StateService(socket, remoteConfig, control, video, log, bus);
+const state        = new StateService(socket, remoteConfig, control, video, audio, log, bus);
 new TelemetryService(socket, state, bus);
 new ChatService(socket, log);

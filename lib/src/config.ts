@@ -19,6 +19,9 @@ export interface RobotConfig {
     maxV: number; // 100% voltage (e.g. 4.2 for LiPo 1S)
   };
   pins?: PinConfig[];
+  audio?: {
+    alsaDevice: string; // e.g. "hw:1,0"
+  };
 }
 
 // Payload the server sends back on config:get ack

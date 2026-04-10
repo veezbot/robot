@@ -6,6 +6,7 @@ import { SocketService } from '../socket/socket.service';
 import { RemoteConfigService } from '../config/remote-config.service';
 import { ControlService } from '../control/control.service';
 import { VideoService } from '../video/video.service';
+import { AudioService } from '../audio/audio.service';
 
 type State = 'sleeping' | 'waking' | 'awake' | 'sleeping-down' | 'error';
 
@@ -30,6 +31,7 @@ export class StateService {
     private readonly remoteConfig: RemoteConfigService,
     private readonly control: ControlService,
     private readonly video: VideoService,
+    private readonly audio: AudioService,
     private readonly log: LogService,
     bus: BusService,
   ) {
@@ -58,6 +60,7 @@ export class StateService {
       this.control.initPins();
       this.control.start();
       await this.video.start();
+      await this.audio.start();
       this.state = 'awake';
     } catch (e) {
       this.lastError = String(e);
@@ -71,6 +74,7 @@ export class StateService {
     this.state = 'sleeping-down';
     try {
       await this.video.stop();
+      await this.audio.stop();
       this.control.stop();
     } finally {
       this.state = 'sleeping';

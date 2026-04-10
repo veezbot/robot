@@ -1,13 +1,18 @@
-import { RobotConfigEvent, type PinConfig, type RobotConfigGetResponse } from '@veezbot/robot-lib';
+import { RobotConfigEvent, type PinConfig, type RobotConfig, type RobotConfigGetResponse } from '@veezbot/robot-lib';
 import { SocketService } from '../socket/socket.service';
 
 export class RemoteConfigService {
   robotId!: string;
   streamUrl!: string;
   pins: PinConfig[] = [];
+  audio: RobotConfig['audio'] = undefined;
 
   get whipUrl(): string {
     return `${this.streamUrl}/robot/${this.robotId}/whip`;
+  }
+
+  get whipAudioUrl(): string {
+    return `${this.streamUrl}/robot/${this.robotId}/audio/whip`;
   }
 
   constructor(private readonly socket: SocketService) {}
@@ -18,6 +23,7 @@ export class RemoteConfigService {
     this.robotId   = res.data!.robotId;
     this.streamUrl = res.data!.streamUrl;
     this.pins      = res.data!.config.pins ?? [];
-    console.log('[RemoteConfigService] Config loaded', { robotId: this.robotId, whipUrl: this.whipUrl });
+    this.audio     = res.data!.config.audio;
+    console.log('[RemoteConfigService] Config loaded', { robotId: this.robotId, whipUrl: this.whipUrl, audio: !!this.audio });
   }
 }
