@@ -9,8 +9,8 @@ ROBOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 FFMPEG_BIN="$ROBOT_DIR/ffmpeg/bin/ffmpeg"
 
 echo "==> Pushing ffmpeg-whip to Pi..."
+sshpass -p "$PI_PASS" scp -o StrictHostKeyChecking=no "$FFMPEG_BIN" "$PI_USER@$PI_HOST:/tmp/ffmpeg-whip"
 sshpass -p "$PI_PASS" ssh -o StrictHostKeyChecking=no "$PI_USER@$PI_HOST" \
-  "echo $PI_PASS | sudo -S tee /usr/local/bin/ffmpeg-whip > /dev/null && sudo chmod +x /usr/local/bin/ffmpeg-whip" \
-  < "$FFMPEG_BIN"
+  "echo $PI_PASS | sudo -S mv /tmp/ffmpeg-whip /usr/local/bin/ffmpeg-whip && echo $PI_PASS | sudo -S chmod +x /usr/local/bin/ffmpeg-whip"
 
 echo "==> Done."

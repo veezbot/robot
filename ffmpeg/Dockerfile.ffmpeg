@@ -2,7 +2,7 @@ FROM debian:bookworm AS builder
 
 RUN apt-get update && apt-get install -y \
     build-essential git pkg-config nasm \
-    libssl-dev libx264-dev libopus-dev \
+    libssl-dev libx264-dev libopus-dev libasound2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone --depth=1 https://git.ffmpeg.org/ffmpeg.git /ffmpeg
@@ -14,6 +14,7 @@ RUN ./configure \
     --enable-version3 \
     --enable-libx264 \
     --enable-libopus \
+    --enable-alsa \
     --enable-gpl \
     --disable-debug \
     --disable-doc \
