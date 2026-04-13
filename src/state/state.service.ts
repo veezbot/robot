@@ -11,18 +11,20 @@ import { AudioService } from '../audio/audio.service';
 type State = 'sleeping' | 'waking' | 'awake' | 'sleeping-down' | 'error';
 
 export class StateService {
-  private _state:    State   = 'sleeping';
-  private connected          = false;
+  private _state:  State = 'sleeping';
+  private connected     = false;
   private queue: Promise<void> = Promise.resolve();
-  lastError: string | null   = null;
+  private _errors: Partial<Record<string, string>> = {};
 
-  private get state()        { return this._state; }
+  private get state()         { return this._state; }
   private set state(s: State) { this._state = s; this.log.info(`State → ${s}`); }
 
+  get errors(): string[] { return Object.values(this._errors) as string[]; }
+
   get status(): RobotStatus {
-    if (this.state === 'awake'  || this.state === 'waking')        return 'awake';
-    if (this.state === 'error')                                    return 'error';
-    if (this.state === 'sleeping-down' || this.connected)          return 'sleeping';
+    if (this.state === 'error')                                return 'error';
+    if (this.state === 'awake' || this.state === 'waking')    return this.errors.length > 0 ? 'error' : 'awake';
+    if (this.state === 'sleeping-down' || this.connected)     return 'sleeping';
     return 'connecting';
   }
 
@@ -37,6 +39,11 @@ export class StateService {
   ) {
     bus.on(BusEvent.SocketConnected,    () => { this.connected = true;  this.enqueue(() => this.wake());  });
     bus.on(BusEvent.SocketDisconnected, () => { this.connected = false; this.enqueue(() => this.sleep()); });
+    bus.on(BusEvent.Error, ({ kind, message }) => {
+      if (this.state !== 'awake') return;
+      if (message) this._errors[kind] = message;
+      else         delete this._errors[kind];
+    });
 
     socketService.on(ActionEvent.Execute, (payload: ActionExecutePayload, callback: (r: ActionExecuteResponse) => void) => {
       const actions: Partial<Record<string, () => void>> = {
@@ -54,7 +61,7 @@ export class StateService {
   private async wake() {
     if (this.state === 'awake' || this.state === 'waking') return;
     this.state = 'waking';
-    this.lastError = null;
+    this._errors = {};
     try {
       await this.remoteConfig.fetch();
       this.control.initPins();
@@ -63,8 +70,8 @@ export class StateService {
       await this.audio.start();
       this.state = 'awake';
     } catch (e) {
-      this.lastError = String(e);
-      this.log.error(`Wake failed: ${this.lastError}`);
+      this._errors['wake'] = String(e);
+      this.log.error(`Wake failed: ${this._errors['wake']}`);
       this.state = 'error';
     }
   }

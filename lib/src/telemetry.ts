@@ -13,7 +13,7 @@ export interface NetworkQuality {
 
 export interface RobotTelemetryData {
   status:         RobotStatus;
-  error:          string | null;
+  errors:         string[];
   cpuLoad:        number;  // 0–100 %
   socTemp:        number;  // °C
   ramUsed:        number;  // 0–100 %

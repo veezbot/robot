@@ -2,6 +2,8 @@ import { ChildProcess } from 'child_process';
 import { RemoteConfigService } from '../config/remote-config.service';
 import { CommandService } from '../command/command.service';
 import { LogService } from '../log/log.service';
+import { BusService } from '../bus/bus.service';
+import { BusEvent } from '../bus/bus.events';
 
 const MOCK          = process.env['MOCK'] === 'true';
 const RESTART_DELAY = 3_000;
@@ -18,6 +20,7 @@ export class VideoService {
     private readonly remoteConfig: RemoteConfigService,
     private readonly command: CommandService,
     private readonly log: LogService,
+    private readonly bus: BusService,
   ) {}
 
   async start(): Promise<void> {
@@ -46,6 +49,7 @@ export class VideoService {
   }
 
   private spawnProcess() {
+    this.bus.emit(BusEvent.Error, { kind: 'video', message: null });
     this.process = this.command.spawn(STREAM_CMD(this.remoteConfig.videoWhipUrl));
 
     this.process.stderr?.on('data', (data: Buffer) => {
@@ -58,7 +62,9 @@ export class VideoService {
     this.process.on('close', (code) => {
       this.process = null;
       if (code !== 0 && code !== null) {
-        this.log.error(`Video stream crashed (code ${code})`);
+        const message = `Video stream crashed (code ${code})`;
+        this.log.error(message);
+        this.bus.emit(BusEvent.Error, { kind: 'video', message });
         this.scheduleRestart();
       } else {
         this.log.info('Video stream ended');
@@ -67,7 +73,9 @@ export class VideoService {
 
     this.process.on('error', (err) => {
       this.process = null;
-      this.log.error(`Video stream error: ${err.message}`);
+      const message = `Video stream error: ${err.message}`;
+      this.log.error(message);
+      this.bus.emit(BusEvent.Error, { kind: 'video', message });
       this.scheduleRestart();
     });
   }

@@ -127,9 +127,9 @@ export class TelemetryService {
     const uptime  = Math.floor(os.uptime());
     const networkQuality = getNetworkQuality();
     const status = this.state.status;
-    const error  = this.state.lastError;
+    const errors = this.state.errors;
 
-    const payload: RobotTelemetryData = { status, error, cpuLoad, socTemp, ramUsed, uptime, networkQuality, battery };
+    const payload: RobotTelemetryData = { status, errors, cpuLoad, socTemp, ramUsed, uptime, networkQuality, battery };
     this.socket.emit(RobotTelemetryEvent.Push, payload);
   }
 
