@@ -7,6 +7,7 @@ import { RemoteConfigService } from '../config/remote-config.service';
 import { ControlService } from '../control/control.service';
 import { VideoService } from '../video/video.service';
 import { AudioService } from '../audio/audio.service';
+import { CommandService } from '../command/command.service';
 
 type State = 'sleeping' | 'waking' | 'awake' | 'sleeping-down' | 'error';
 
@@ -35,6 +36,7 @@ export class StateService {
     private readonly video: VideoService,
     private readonly audio: AudioService,
     private readonly log: LogService,
+    private readonly command: CommandService,
     bus: BusService,
   ) {
     bus.on(BusEvent.SocketConnected,    () => { this.connected = true;  this.enqueue(() => this.wake());  });
@@ -47,8 +49,10 @@ export class StateService {
 
     socketService.on(ActionEvent.Execute, (payload: ActionExecutePayload, callback: (r: ActionExecuteResponse) => void) => {
       const actions: Partial<Record<string, () => void>> = {
-        [Action.Wake]:  () => this.enqueue(async () => { await this.wake();  callback({ data: {} }); }),
-        [Action.Sleep]: () => this.enqueue(async () => { await this.sleep(); callback({ data: {} }); }),
+        [Action.Wake]:   () => this.enqueue(async () => { await this.wake();  callback({ data: {} }); }),
+        [Action.Sleep]:  () => this.enqueue(async () => { await this.sleep(); callback({ data: {} }); }),
+        [Action.RebootClient]:       () => this.enqueue(async () => { await this.sleep(); callback({ data: {} }); setTimeout(() => process.exit(0), 500); }),
+        [Action.RebootSystem]: () => this.enqueue(async () => { await this.sleep(); callback({ data: {} }); setTimeout(() => this.command.run('sudo reboot'), 500); }),
       };
       (actions[payload.action] ?? (() => callback({ error: `Unknown action: ${payload.action}` })))();
     });

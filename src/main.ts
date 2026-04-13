@@ -27,6 +27,6 @@ const remoteConfig = new RemoteConfigService(socket);
 const video        = new VideoService(remoteConfig, command, log, bus);
 const audio        = new AudioService(remoteConfig, command, log, bus);
 const control      = new ControlService(socket, bus, remoteConfig, log);
-const state        = new StateService(socket, remoteConfig, control, video, audio, log, bus);
+const state        = new StateService(socket, remoteConfig, control, video, audio, log, command, bus);
 new TelemetryService(socket, state, bus);
 new ChatService(socket, log);

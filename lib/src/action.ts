@@ -5,8 +5,10 @@ export const ActionEvent = {
 } as const;
 
 export const Action = {
-  Sleep: 'sleep',
-  Wake:  'wake',
+  Sleep:        'sleep',
+  Wake:         'wake',
+  RebootClient: 'reboot-client',
+  RebootSystem: 'reboot-system',
 } as const;
 
 // Robot-side: no robotId — the robot knows its own identity
