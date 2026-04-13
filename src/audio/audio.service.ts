@@ -48,7 +48,7 @@ export class AudioService {
 
   private spawnProcess() {
     const { alsaDevice } = this.remoteConfig.audio!;
-    this.process = this.command.spawn(STREAM_CMD(this.remoteConfig.whipAudioUrl, alsaDevice));
+    this.process = this.command.spawn(STREAM_CMD(this.remoteConfig.audioWhipUrl, alsaDevice));
 
     this.process.stderr?.on('data', (data: Buffer) => {
       for (const line of data.toString().split('\n')) {

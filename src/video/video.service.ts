@@ -46,12 +46,12 @@ export class VideoService {
   }
 
   private spawnProcess() {
-    this.process = this.command.spawn(STREAM_CMD(this.remoteConfig.whipUrl));
+    this.process = this.command.spawn(STREAM_CMD(this.remoteConfig.videoWhipUrl));
 
     this.process.stderr?.on('data', (data: Buffer) => {
       for (const line of data.toString().split('\n')) {
         const t = line.trim();
-        if (t && !/^#\d+/.test(t) && !/^frame=/.test(t)) this.log.info(`[ffmpeg] ${t}`);
+        if (t && !/^#\d+/.test(t) && !/^frame=/.test(t)) this.log.info(`[ffmpeg-video] ${t}`);
       }
     });
 

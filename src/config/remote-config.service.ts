@@ -7,11 +7,11 @@ export class RemoteConfigService {
   pins: PinConfig[] = [];
   audio: RobotConfig['audio'] = undefined;
 
-  get whipUrl(): string {
+  get videoWhipUrl(): string {
     return `${this.streamUrl}/robot/${this.robotId}/video/whip`;
   }
 
-  get whipAudioUrl(): string {
+  get audioWhipUrl(): string {
     return `${this.streamUrl}/robot/${this.robotId}/audio/whip`;
   }
 
@@ -24,6 +24,6 @@ export class RemoteConfigService {
     this.streamUrl = res.data!.streamUrl;
     this.pins      = res.data!.config.pins ?? [];
     this.audio     = res.data!.config.audio;
-    console.log('[RemoteConfigService] Config loaded', { robotId: this.robotId, whipUrl: this.whipUrl, audio: !!this.audio });
+    console.log('[RemoteConfigService] Config loaded', { robotId: this.robotId, videoWhipUrl: this.videoWhipUrl, audio: this.audio });
   }
 }
