@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
-const CONFIG_PATH = join('/boot', 'veezbot.config.json');
+const CONFIG_PATH = process.env.VEEZBOT_CONFIG_PATH ?? join('/boot', 'veezbot.config.json');
 
 interface ConfigFile {
   token?: string;

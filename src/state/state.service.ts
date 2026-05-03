@@ -1,6 +1,4 @@
-import { Action, ActionEvent, ActionExecutePayload, ActionExecuteResponse, RobotStatus } from '@veezbot/robot-lib';
-import { BusService } from '../bus/bus.service';
-import { BusEvent } from '../bus/bus.events';
+import { Action, ActionEvent, type ActionExecutePayload, type WsResponse, RobotStatus } from '@veezbot/robot-lib';
 import { LogService } from '../log/log.service';
 import { SocketService } from '../socket/socket.service';
 import { RemoteConfigService } from '../config/remote-config.service';
@@ -37,24 +35,27 @@ export class StateService {
     private readonly audio: AudioService,
     private readonly log: LogService,
     private readonly command: CommandService,
-    bus: BusService,
   ) {
-    bus.on(BusEvent.SocketConnected,    () => { this.connected = true;  this.enqueue(() => this.wake());  });
-    bus.on(BusEvent.SocketDisconnected, () => { this.connected = false; this.enqueue(() => this.sleep()); });
-    bus.on(BusEvent.Error, ({ kind, message }) => {
+    socketService.connected.register(()    => { this.connected = true;  this.enqueue(() => this.wake());  });
+    socketService.disconnected.register(() => { this.connected = false; this.enqueue(() => this.sleep()); });
+
+    const onError = ({ kind, message }: { kind: string; message: string | null }) => {
       if (this.state !== 'awake') return;
       if (message) this._errors[kind] = message;
       else         delete this._errors[kind];
-    });
+    };
+    video.error.register(onError);
+    audio.error.register(onError);
 
-    socketService.on(ActionEvent.Execute, (payload: ActionExecutePayload, callback: (r: ActionExecuteResponse) => void) => {
+    socketService.on(ActionEvent.Execute, (payload: ActionExecutePayload, callback: (r: WsResponse<Record<string, unknown>>) => void) => {
+      const ack = typeof callback === 'function' ? callback : () => {};
       const actions: Partial<Record<string, () => void>> = {
-        [Action.Wake]:   () => this.enqueue(async () => { await this.wake();  callback({ data: {} }); }),
-        [Action.Sleep]:  () => this.enqueue(async () => { await this.sleep(); callback({ data: {} }); }),
-        [Action.RebootClient]:       () => this.enqueue(async () => { await this.sleep(); callback({ data: {} }); setTimeout(() => process.exit(0), 500); }),
-        [Action.RebootSystem]: () => this.enqueue(async () => { await this.sleep(); callback({ data: {} }); setTimeout(() => this.command.run('sudo reboot'), 500); }),
+        [Action.Wake]: () => this.enqueue(async () => { await this.wake();  ack({ data: {} }); }),
+        [Action.Sleep]: () => this.enqueue(async () => { await this.sleep(); ack({ data: {} }); }),
+        [Action.RebootClient]: () => this.enqueue(async () => { await this.sleep(); ack({ data: {} }); setTimeout(() => process.exit(0), 500); }),
+        [Action.RebootSystem]: () => this.enqueue(async () => { await this.sleep(); ack({ data: {} }); setTimeout(() => this.command.run('sudo reboot'), 500); }),
       };
-      (actions[payload.action] ?? (() => callback({ error: `Unknown action: ${payload.action}` })))();
+      (actions[payload.action] ?? (() => ack({ error: `Unknown action: ${payload.action}` })))();
     });
   }
 

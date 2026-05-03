@@ -10,10 +10,17 @@ ROBOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 prefix() { sed -u "s/^/[$1] /"; }
 
-# 1. Watch lib/ → build lib/dist/ locally → sync + restart on Pi
-(cd "$ROBOT_DIR/lib" && pnpm exec tsup src/index.ts --format cjs,esm --dts --watch --onSuccess "bash $SCRIPT_DIR/remote-deploy-dist.sh" 2>&1 | prefix lib) &
+# 1. Watch lib/ → build lib/dist/ locally → sync lib/dist only (no restart — robot watcher handles restart)
+(cd "$ROBOT_DIR/lib" && pnpm exec tsup --watch --onSuccess "bash $SCRIPT_DIR/remote-deploy-lib.sh" 2>&1 | prefix lib) &
 
 # 2. Watch robot/ → build dist/ locally → sync + restart on Pi
 (cd "$ROBOT_DIR" && pnpm exec tsc-watch --onSuccess "bash $SCRIPT_DIR/remote-deploy-dist.sh" 2>&1 | prefix robot) &
+
+# 3. Stream Pi logs in real-time (follows across restarts)
+(while true; do
+  sshpass -p "$PI_PASS" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 \
+    "$PI_USER@$PI_HOST" "journalctl -f -u veezbot -n 20 --no-pager 2>/dev/null" 2>&1 | prefix pi
+  sleep 3
+done) &
 
 wait

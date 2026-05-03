@@ -4,20 +4,28 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "./dist/index.d.cts",
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch"
+    "build": "node_modules/.bin/tsup",
+    "dev": "node_modules/.bin/tsup --watch"
   },
   "devDependencies": {
     "tsup": "^8.5.1",
-    "typescript": "^5.7.2"
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "zod": "^4.4.1"
   }
 }

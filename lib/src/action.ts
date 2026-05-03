@@ -1,4 +1,4 @@
-import type { WsResponse } from './ws';
+import { z } from 'zod';
 
 export const ActionEvent = {
   Execute: 'action:execute',
@@ -12,9 +12,8 @@ export const Action = {
 } as const;
 
 // Robot-side: no robotId — the robot knows its own identity
-export interface ActionExecutePayload {
-  action: string;
-  args?:  Record<string, string>;
-}
-
-export type ActionExecuteResponse = WsResponse<Record<string, unknown>>;
+export const ActionExecutePayloadSchema = z.object({
+  action: z.string(),
+  args:   z.record(z.string(), z.string()).optional(),
+});
+export type ActionExecutePayload = z.infer<typeof ActionExecutePayloadSchema>;

@@ -1,17 +1,16 @@
 import { io, Socket } from 'socket.io-client';
-
 import { ErrorCode } from '@veezbot/robot-lib';
-import { BusService } from '../bus/bus.service';
-import { BusEvent } from '../bus/bus.events';
+import { Notifier } from '../notifier';
 import { LocalConfigService } from '../config/local-config.service';
 
 export class SocketService {
   private socket: Socket;
 
-  constructor(
-    bus: BusService,
-    localConfig: LocalConfigService,
-  ) {
+  readonly connected    = new Notifier();
+  readonly disconnected = new Notifier();
+  readonly heartbeat    = new Notifier();
+
+  constructor(localConfig: LocalConfigService) {
     console.log(`[SocketService] Connecting to ${localConfig.serverUrl}/robot`);
     this.socket = io(`${localConfig.serverUrl}/robot`, {
       auth: { token: localConfig.token },
@@ -24,14 +23,14 @@ export class SocketService {
 
     this.socket.on('connect', () => {
       console.log('[SocketService] Connected!');
-      bus.emit(BusEvent.SocketConnected);
+      this.connected.emit();
     });
 
-    this.socket.io.engine.on('packetCreate', () => bus.emit(BusEvent.Heartbeat));
+    this.socket.on('ws:ping', (ack) => { ack(); this.heartbeat.emit(); });
 
     this.socket.on('disconnect', (reason) => {
       console.log('[SocketService] Disconnected!', reason);
-      bus.emit(BusEvent.SocketDisconnected);
+      this.disconnected.emit();
     });
 
     this.socket.on('connect_error', (error: Error) => {

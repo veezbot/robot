@@ -1,8 +1,6 @@
 import { RobotControlEvent, RobotPinOutputPayload } from '@veezbot/robot-lib';
 import { LogService } from '../log/log.service';
 import { SocketService } from '../socket/socket.service';
-import { BusService } from '../bus/bus.service';
-import { BusEvent } from '../bus/bus.events';
 import { RemoteConfigService } from '../config/remote-config.service';
 import { Pin } from './pin';
 
@@ -15,11 +13,10 @@ export class ControlService {
 
   constructor(
     socketService: SocketService,
-    bus: BusService,
     private readonly remoteConfig: RemoteConfigService,
     private readonly log: LogService,
   ) {
-    bus.on(BusEvent.Heartbeat, () => { if (this.active) this.resetFailsafe(); });
+    socketService.heartbeat.register(() => { if (this.active) this.resetFailsafe(); });
     socketService.on(RobotControlEvent.Pins, (payload: RobotPinOutputPayload) => {
       this.applyPins(payload.pins);
     });

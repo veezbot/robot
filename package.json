@@ -1,13 +1,13 @@
 {
 	"name": "@veezbot/robot",
 	"scripts": {
-        "init:pi": "bash scripts/remote-init.sh",
-        "install:service": "bash scripts/remote-install-service.sh",
-        "wifi:add": "bash scripts/remote-wifi.sh",
-        "deploy:ffmpeg": "bash scripts/remote-deploy-ffmpeg.sh",
+		"init:pi": "bash scripts/remote-init.sh",
+		"install:service": "bash scripts/remote-install-service.sh",
+		"wifi:add": "bash scripts/remote-wifi.sh",
+		"deploy:ffmpeg": "bash scripts/remote-deploy-ffmpeg.sh",
 		"build": "tsc",
-        "deploy:dist": "bash scripts/remote-deploy-dist.sh",
-        "start": "bash scripts/run.sh",
+		"deploy:dist": "bash scripts/remote-deploy-dist.sh",
+		"start": "bash scripts/run.sh",
 		"dev:remote": "bash scripts/remote-dev.sh"
 	},
 	"dependencies": {
@@ -15,15 +15,12 @@
 		"socket.io-client": "^4.8.3"
 	},
 	"optionalDependencies": {
-		"pigpio": "^3.3.1",
-		"i2c-bus": "^5.2.3"
+		"i2c-bus": "^5.2.3",
+		"pigpio": "^3.3.1"
 	},
 	"devDependencies": {
-		"@types/node": "^20.11.27",
-		"tsc-watch": "^6.0.4",
-		"typescript": "^5.9.3"
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": ["pigpio", "i2c-bus"]
+		"@types/node": "^25.6.0",
+		"tsc-watch": "^7.2.0",
+		"typescript": "^6.0.3"
 	}
 }
