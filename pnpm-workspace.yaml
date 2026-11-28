@@ -1,0 +1,7 @@
+packages:
+  - lib
+
+onlyBuiltDependencies:
+  - esbuild
+  - i2c-bus
+  - pigpio

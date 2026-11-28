@@ -1,0 +1,31 @@
+{
+	"name": "@veezbot/robot",
+	"version": "0.0.0",
+	"scripts": {
+		"init:pi": "node scripts/remote-init.mjs",
+		"install:service": "node scripts/remote-install-service.mjs",
+		"wifi:add": "node scripts/remote-wifi.mjs",
+		"deploy:ffmpeg": "node scripts/remote-deploy-ffmpeg.mjs",
+		"build": "tsc",
+		"deploy:dist": "node scripts/remote-deploy-dist.mjs",
+		"start": "bash scripts/run.sh",
+		"dev:remote": "node scripts/remote-dev.mjs",
+		"setup:ssh-key": "node scripts/setup-ssh-key.mjs"
+	},
+	"dependencies": {
+		"@veezbot/robot-lib": "workspace:*",
+		"socket.io-client": "^4.8.3"
+	},
+	"optionalDependencies": {
+		"i2c-bus": "^5.2.3",
+		"pigpio": "^3.3.1"
+	},
+	"devDependencies": {
+		"@types/node": "^25.6.0",
+		"concurrently": "^9.1.2",
+		"dotenv": "^16.4.7",
+		"tsc-watch": "^7.2.0",
+		"typescript": "^6.0.3"
+	},
+	"packageManager": "pnpm@10.33.2"
+}
